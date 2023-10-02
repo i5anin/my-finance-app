@@ -5,46 +5,54 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Доходы и Расходы</title>
-        <style>
-            table,
-            th,
-            td {
-                border: 1px solid black;
-                border-collapse: collapse;
-                padding: 8px;
-            }
-        </style>
+        <!-- Подключаем Bootstrap CSS -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     </head>
 
-    <body>
+    <body class="bg-dark text-white">
 
-        <h2>Текущая дата: <span id="currentDate"></span></h2>
+        <div class="container mt-5">
 
-        <h3>Добавить или изменить запись:</h3>
-        <form id="financeForm">
-            <input type="date" id="entryDate">
-            <input type="number" id="amount" placeholder="Сумма (+1000 или -1000)">
-            <select id="category">
-                <option value="food">Еда</option>
-                <option value="entertainment">Развлечения</option>
-                <option value="bills">Счета</option>
-            </select>
-            <button type="button" onclick="addOrUpdateEntry()">Добавить/Обновить</button>
-        </form>
+            <h2>Текущая дата: <span id="currentDate"></span></h2>
 
-        <h3>Записи:</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>№</th>
-                    <th>Дата</th>
-                    <th>Сумма</th>
-                    <th>Категория</th>
-                </tr>
-            </thead>
-            <tbody id="entries">
-            </tbody>
-        </table>
+            <h3 class="mt-4">Добавить или изменить запись:</h3>
+            <form id="financeForm" class="mb-4">
+                <div class="form-row">
+                    <div class="col">
+                        <input type="date" id="entryDate" class="form-control">
+                    </div>
+                    <div class="col">
+                        <input type="number" id="amount" placeholder="Сумма (+1000 или -1000)" class="form-control">
+                    </div>
+                    <div class="col">
+                        <select id="category" class="form-control">
+                            <option value="Еда">Еда</option>
+                            <option value="Развлечения">Развлечения</option>
+                            <option value="Счета">Счета</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <button type="button" onclick="addOrUpdateEntry()"
+                            class="btn btn-primary">Добавить/Обновить</button>
+                    </div>
+                </div>
+            </form>
+
+            <h3 class="mt-4">Записи:</h3>
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дата</th>
+                        <th>Сумма</th>
+                        <th>Категория</th>
+                    </tr>
+                </thead>
+                <tbody id="entries">
+                </tbody>
+            </table>
+
+        </div>
 
         <script>
             let entries = {};
@@ -53,7 +61,20 @@
                 return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear();
             }
 
-            document.getElementById("currentDate").innerText = formatDate(new Date());
+            function setCurrentDate() {
+                const today = new Date();
+                const year = today.getFullYear();
+                let month = today.getMonth() + 1;
+                let day = today.getDate();
+
+                month = month < 10 ? '0' + month : month;
+                day = day < 10 ? '0' + day : day;
+
+                const formattedToday = `${year}-${month}-${day}`;
+
+                document.getElementById('entryDate').value = formattedToday;
+                document.getElementById("currentDate").innerText = formatDate(today);
+            }
 
             function addOrUpdateEntry() {
                 const date = document.getElementById('entryDate').valueAsDate;
@@ -71,7 +92,7 @@
 
             function renderEntries() {
                 const table = document.getElementById('entries');
-                table.innerHTML = ''; // Очистить предыдущие записи
+                table.innerHTML = '';
 
                 let dayCounter = 1;
                 for (let date in entries) {
@@ -82,8 +103,14 @@
                     row.insertCell(3).innerText = entries[date].category;
                 }
             }
+
+            setCurrentDate();
         </script>
 
+        <!-- Подключаем Bootstrap JS и Popper.js -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     </body>
 
 </html>
