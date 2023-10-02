@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Доходы и Расходы</title>
+        <style>
+            table,
+            th,
+            td {
+                border: 1px solid black;
+                border-collapse: collapse;
+                padding: 8px;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <h2>Текущая дата: <span id="currentDate"></span></h2>
+
+        <h3>Добавить или изменить запись:</h3>
+        <form id="financeForm">
+            <input type="date" id="entryDate">
+            <input type="number" id="amount" placeholder="Сумма (+1000 или -1000)">
+            <select id="category">
+                <option value="food">Еда</option>
+                <option value="entertainment">Развлечения</option>
+                <option value="bills">Счета</option>
+            </select>
+            <button type="button" onclick="addOrUpdateEntry()">Добавить/Обновить</button>
+        </form>
+
+        <h3>Записи:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Дата</th>
+                    <th>Сумма</th>
+                    <th>Категория</th>
+                </tr>
+            </thead>
+            <tbody id="entries">
+            </tbody>
+        </table>
+
+        <script>
+            let entries = {};
+
+            function formatDate(date) {
+                return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear();
+            }
+
+            document.getElementById("currentDate").innerText = formatDate(new Date());
+
+            function addOrUpdateEntry() {
+                const date = document.getElementById('entryDate').valueAsDate;
+                const formattedDate = formatDate(date);
+                const amount = document.getElementById('amount').value;
+                const category = document.getElementById('category').value;
+
+                entries[formattedDate] = {
+                    amount: amount,
+                    category: category
+                };
+
+                renderEntries();
+            }
+
+            function renderEntries() {
+                const table = document.getElementById('entries');
+                table.innerHTML = ''; // Очистить предыдущие записи
+
+                let dayCounter = 1;
+                for (let date in entries) {
+                    const row = table.insertRow();
+                    row.insertCell(0).innerText = dayCounter++;
+                    row.insertCell(1).innerText = date;
+                    row.insertCell(2).innerText = entries[date].amount;
+                    row.insertCell(3).innerText = entries[date].category;
+                }
+            }
+        </script>
+
+    </body>
+
+</html>
