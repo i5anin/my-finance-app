@@ -5,16 +5,12 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Доходы и Расходы</title>
-        <!-- Подключаем Bootstrap CSS -->
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     </head>
 
     <body class="bg-dark text-white">
-
         <div class="container mt-5">
-
             <h2>Текущая дата: <span id="currentDate"></span></h2>
-
             <h3 class="mt-4">Добавить или изменить запись:</h3>
             <form id="financeForm" class="mb-4">
                 <div class="form-row">
@@ -37,7 +33,6 @@
                     </div>
                 </div>
             </form>
-
             <h3 class="mt-4">Записи:</h3>
             <table class="table table-dark">
                 <thead>
@@ -48,83 +43,14 @@
                         <th>Категория</th>
                     </tr>
                 </thead>
-                <tbody id="entries">
-                </tbody>
+                <tbody id="entries"></tbody>
             </table>
-
         </div>
-
-        <script>
-            let entries = {};
-
-            function saveToLocalStorage() {
-                localStorage.setItem('entries', JSON.stringify(entries));
-            }
-
-            function loadFromLocalStorage() {
-                const savedEntries = localStorage.getItem('entries');
-                if (savedEntries) {
-                    entries = JSON.parse(savedEntries);
-                }
-            }
-
-            function formatDate(date) {
-                return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear();
-            }
-
-            function setCurrentDate() {
-                const today = new Date();
-                const year = today.getFullYear();
-                let month = today.getMonth() + 1;
-                let day = today.getDate();
-
-                month = month < 10 ? '0' + month : month;
-                day = day < 10 ? '0' + day : day;
-
-                const formattedToday = `${year}-${month}-${day}`;
-
-                document.getElementById('entryDate').value = formattedToday;
-                document.getElementById("currentDate").innerText = formatDate(today);
-            }
-
-            function addOrUpdateEntry() {
-                const date = document.getElementById('entryDate').valueAsDate;
-                const formattedDate = formatDate(date);
-                const amount = document.getElementById('amount').value;
-                const category = document.getElementById('category').value;
-
-                entries[formattedDate] = {
-                    amount: amount,
-                    category: category
-                };
-
-                renderEntries();
-                saveToLocalStorage();
-            }
-
-            function renderEntries() {
-                const table = document.getElementById('entries');
-                table.innerHTML = '';
-
-                let dayCounter = 1;
-                for (let date in entries) {
-                    const row = table.insertRow();
-                    row.insertCell(0).innerText = dayCounter++;
-                    row.insertCell(1).innerText = date;
-                    row.insertCell(2).innerText = entries[date].amount;
-                    row.insertCell(3).innerText = entries[date].category;
-                }
-            }
-
-            loadFromLocalStorage();
-            setCurrentDate();
-        </script>
-
-        <!-- Подключаем Bootstrap JS и Popper.js -->
+        <script src="./app.js"></script>
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@typicode/json-server"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     </body>
 
 </html>
