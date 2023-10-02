@@ -54,7 +54,39 @@ function addOrUpdateEntry() {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(entry)
-  }).then(() => getEntries());
+  }).then(() => {
+    updateOrAddRow(entry);
+    getEntries(); // получаем обновленные данные для согласованности
+  });
+}
+
+function renderEntries() {
+  const table = document.getElementById("entries");
+  table.innerHTML = "";
+
+  for (let entry of entries) {
+    updateOrAddRow(entry);
+  }
+}
+
+function updateOrAddRow(entry) {
+  const table = document.getElementById("entries");
+  let row = Array.from(table.rows).find(
+    (r) => r.cells[1].innerText === entry.date
+  );
+
+  if (row) {
+    // Если строка для этой даты уже существует, обновите ее
+    row.cells[2].innerText = entry.amount;
+    row.cells[3].innerText = entry.category;
+  } else {
+    // Если строки нет, добавьте новую
+    row = table.insertRow();
+    row.insertCell(0).innerText = table.rows.length; // номер строки
+    row.insertCell(1).innerText = entry.date;
+    row.insertCell(2).innerText = entry.amount;
+    row.insertCell(3).innerText = entry.category;
+  }
 }
 
 function renderEntries() {
