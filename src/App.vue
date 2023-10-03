@@ -1,14 +1,14 @@
 <template>
-  <OrderBook />
+  <TabBook />
 </template>
 
 <script>
-  import OrderBook from "@/components/OrderBook.vue";
+  import TabBook from "@/components/TabBook.vue";
 
   export default {
     name: "App",
     components: {
-      OrderBook
+      TabBook
     }
   };
 </script>
@@ -30,18 +30,4 @@
     padding: 2px 0 !important;
   }
 
-  .red,
-  .sell-cell {
-    color: red;
-  }
-
-  .green,
-  .buy-cell {
-    color: green;
-  }
-
-  .yellow,
-  .highlighted {
-    color: yellow;
-  }
 </style>
