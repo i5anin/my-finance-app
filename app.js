@@ -68,32 +68,36 @@ function addOrUpdateEntry() {
         (e) => e.date === formattedDate && e.category === category
     );
 
+    let url, method;
+
     if (existingEntry) {
-        fetch(`http://localhost:3000/entries/${existingEntry.id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(entry),
-        })
-            .then(() => {
-                return getEntries();
-            })
-            .then(() => calculateTotal());
+        url = `http://localhost:3000/entries/${existingEntry.id}`;
+        method = "PUT";
     } else {
-        fetch("http://localhost:3000/entries", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(entry),
-        })
-            .then(() => {
-                return getEntries();
-            })
-            .then(() => calculateTotal());
+        url = "http://localhost:3000/entries";
+        method = "POST";
     }
+
+    fetch(url, {
+        method: method,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(entry),
+    })
+        .then(response => {
+            if (!response.ok) {
+                return Promise.reject(`Failed to fetch: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(() => {
+            return getEntries();
+        })
+        .then(() => calculateTotal())
+        .catch(error => console.error(error));
 }
+
 
 function calculateTotal() {
     let totalIncome = 0;
