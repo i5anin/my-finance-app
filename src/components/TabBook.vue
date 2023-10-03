@@ -1,105 +1,89 @@
 <template>
-  <el-container>
-    <el-header>
-      <h3>Общая статистика:</h3>
+  <div>
+    <div>
+      <h3 class="mt-4">Общая статистика:</h3>
       <div>
-        <span>Общий доход: </span><span>{{ formatAmount(totalIncome) }}</span><br>
-        <span>Общий расход: </span><span>{{ formatAmount(totalExpense) }}</span><br>
-        <span>Общая сумма: </span><span>{{ formatAmount(totalIncome + totalExpense) }}</span>
+        <span>Общий доход: </span><span>{{ totalIncome }}</span><br>
+        <span>Общий расход: </span><span>{{ totalExpense }}</span><br>
+        <span>Общая сумма: </span><span>{{ totalSum }}</span>
       </div>
+
       <h2>Текущая дата: {{ currentDate }}</h2>
-    </el-header>
-    <el-main>
-      <h3>Добавить или изменить запись:</h3>
-      <el-form :model="entryForm" ref="entryForm">
-        <el-row>
-          <el-col :span="6">
-            <el-form-item label="Дата">
-              <el-date-picker v-model="entryForm.date" type="date"></el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="Доход/Расход">
-              <el-input v-model="entryForm.amount" placeholder="Доход/Расход"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="Категория">
-              <el-select v-model="entryForm.category" placeholder="Выберите категорию">
-                <el-option label="Еда" value="Еда"></el-option>
-                <el-option label="Развлечения" value="Развлечения"></el-option>
-                <el-option label="Счета" value="Счета"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-button type="primary" @click="addOrUpdateEntry">Добавить/Обновить</el-button>
-          </el-col>
-        </el-row>
+      <h3 class="mt-4">Добавить или изменить запись:</h3>
+      <el-form ref="form" :model="form" label-width="120px">
+        <el-form-item label="Дата">
+          <el-date-picker v-model="form.date" type="date" placeholder="Выберите дату"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="Сумма">
+          <el-input v-model="form.amount" placeholder="Доход/Расход"></el-input>
+        </el-form-item>
+        <el-form-item label="Категория">
+          <el-select v-model="form.category" placeholder="Выберите категорию">
+            <el-option label="Еда" value="Еда"></el-option>
+            <el-option label="Развлечения" value="Развлечения"></el-option>
+            <el-option label="Счета" value="Счета"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="addOrUpdateEntry">Добавить/Обновить</el-button>
+        </el-form-item>
       </el-form>
-      <h3>Записи:</h3>
-      <el-table :data="entries" border style="width: 100%">
-        <el-table-column prop="id" label="№" width="180"></el-table-column>
-        <el-table-column prop="date" label="Дата" width="180"></el-table-column>
-        <el-table-column prop="amount" label="Сумма" width="180"></el-table-column>
+
+      <h3 class="mt-4">Записи:</h3>
+      <el-table :data="entries">
+        <el-table-column prop="id" label="№"></el-table-column>
+        <el-table-column prop="date" label="Дата" :formatter="formatDate"></el-table-column>
+        <el-table-column prop="amount" label="Сумма" :formatter="formatAmount"></el-table-column>
         <el-table-column prop="category" label="Категория"></el-table-column>
-        <el-table-column label="Действия" width="180">
+        <el-table-column label="Действия">
           <template v-slot="scope">
-            <el-button size="mini" @click="loadEntryForEdit(scope.row)">Редактировать</el-button>
-            <el-button size="mini" type="danger" @click="deleteEntry(scope.row.id)">Удалить</el-button>
+            <el-button @click="loadEntryForEdit(scope.row.id)">Редактировать</el-button>
+            <el-button @click="deleteEntry(scope.row.id)">Удалить</el-button>
           </template>
         </el-table-column>
       </el-table>
-    </el-main>
-  </el-container>
+    </div>
+  </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-
 export default {
   data() {
     return {
       entries: [],
-      totalIncome: 0,
-      totalExpense: 0,
-      currentDate: '',
-      entryForm: {
+      form: {
         date: '',
         amount: '',
         category: ''
-      }
+      },
+      totalIncome: 0,
+      totalExpense: 0,
+      totalSum: 0,
+      currentDate: ''
     };
   },
   methods: {
-    formatAmount(amount) {
-      return parseFloat(amount).toLocaleString("ru-RU", {
-        style: "currency",
-        currency: "RUB",
-      });
-    },
     getEntries() {
-      return fetch("http://localhost:3000/entries")
-          .then((response) => response.json())
-          .then((data) => {
+      fetch("http://localhost:3000/entries")
+          .then(response => response.json())
+          .then(data => {
             this.entries = data || [];
             this.calculateTotal();
           });
     },
-    formatDate(date) {
-      const year = date.getFullYear();
-      let month = date.getMonth() + 1;
-      let day = date.getDate();
-
-      month = month < 10 ? "0" + month : month;
-      day = day < 10 ? "0" + day : day;
-
-      return `${year}-${month}-${day}`;
+    formatDate(row, column, cellValue) {
+      const date = new Date(cellValue);
+      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    },
+    formatAmount(row, column, cellValue) {
+      return parseFloat(cellValue).toLocaleString("ru-RU", {
+        style: "currency",
+        currency: "RUB",
+      });
     },
     setCurrentDate() {
       const today = new Date();
-      this.currentDate = this.formatDate(today);
-      this.entryForm.date = this.currentDate;
+      this.currentDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
     },
     deleteEntry(id) {
       fetch(`http://localhost:3000/entries/${id}`, {
@@ -111,13 +95,13 @@ export default {
     },
     addOrUpdateEntry() {
       const entry = {
-        date: this.entryForm.date,
-        amount: this.entryForm.amount,
-        category: this.entryForm.category,
+        date: this.form.date,
+        amount: this.form.amount,
+        category: this.form.category,
       };
 
       const existingEntry = this.entries.find(
-          (e) => e.date === entry.date && e.category === entry.category
+          e => e.date === this.form.date && e.category === this.form.category
       );
 
       if (existingEntry) {
@@ -157,19 +141,29 @@ export default {
         }
       }
 
-      this.totalIncome = totalIncome;
-      this.totalExpense = totalExpense;
+      this.totalIncome = totalIncome.toLocaleString("ru-RU", {
+        style: "currency",
+        currency: "RUB",
+      });
+      this.totalExpense = totalExpense.toLocaleString("ru-RU", {
+        style: "currency",
+        currency: "RUB",
+      });
+      this.totalSum = (totalIncome + totalExpense).toLocaleString("ru-RU", {
+        style: "currency",
+        currency: "RUB",
+      });
     },
     loadEntryForEdit(id) {
-      const entry = this.entries.find((e) => e.id === id);
+      const entry = this.entries.find(e => e.id === id);
       if (entry) {
-        this.entryForm.date = entry.date;
-        this.entryForm.amount = entry.amount;
-        this.entryForm.category = entry.category;
+        this.form.date = entry.date;
+        this.form.amount = entry.amount;
+        this.form.category = entry.category;
       }
     }
   },
-  onMounted() {
+  mounted() {
     this.setCurrentDate();
     this.getEntries();
   }
@@ -177,5 +171,5 @@ export default {
 </script>
 
 <style scoped>
-/* Стили вашего компонента */
+/* Ваши стили */
 </style>
