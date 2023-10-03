@@ -54,7 +54,7 @@ export default {
       form: {
         date: '',
         amount: '',
-        category: ''
+        category: 'Еда'  // Категория по умолчанию
       },
       totalIncome: 0,
       totalExpense: 0,
@@ -149,6 +149,10 @@ export default {
   mounted() {
     this.setCurrentDate();
     this.getEntries();
+
+    // Установка даты по умолчанию
+    const today = new Date();
+    this.form.date = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
   }
 };
 </script>
