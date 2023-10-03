@@ -1,20 +1,13 @@
-/**
- * main.js
- *
- * Bootstraps Vuetify and other plugins then mounts the App`
- */
+import { createApp } from "vue";
+import App from "./App.vue";
+import store from "@/store/store.js";
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css";
 
-// Components
-import App from './App.vue'
+import "element-plus/theme-chalk/dark/css-vars.css";
 
-// Composables
-import { createApp } from 'vue'
-
-// Plugins
-import { registerPlugins } from '@/plugins'
-
-const app = createApp(App)
-
-registerPlugins(app)
-
-app.mount('#app')
+// Создайте экземпляр приложения Vue и передайте хранилище в качестве опции
+const app = createApp(App);
+app.use(ElementPlus);
+app.use(store);
+app.mount("#app");
