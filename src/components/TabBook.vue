@@ -100,33 +100,16 @@ export default {
         category: this.form.category,
       };
 
-      const existingEntry = this.entries.find(
-          e => e.date === this.form.date && e.category === this.form.category
-      );
-
-      if (existingEntry) {
-        fetch(`http://localhost:3000/entries/${existingEntry.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(entry),
-        })
-            .then(() => {
-              return this.getEntries();
-            });
-      } else {
-        fetch("http://localhost:3000/entries", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(entry),
-        })
-            .then(() => {
-              return this.getEntries();
-            });
-      }
+      fetch("http://localhost:3000/entries", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(entry),
+      })
+          .then(() => {
+            return this.getEntries();
+          });
     },
     calculateTotal() {
       let totalIncome = 0;
