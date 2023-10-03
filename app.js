@@ -78,16 +78,13 @@ function updateOrAddRow(entry) {
   if (row) {
     // Если строка для этой даты уже существует, обновите ее
     row.cells[2].innerText = entry.amount;
-    row.cells[2].style.color = entry.amount < 0 ? "red" : "green";
     row.cells[3].innerText = entry.category;
   } else {
     // Если строки нет, добавьте новую
     row = table.insertRow();
     row.insertCell(0).innerText = table.rows.length; // номер строки
     row.insertCell(1).innerText = entry.date;
-    const amountCell = row.insertCell(2);
-    amountCell.innerText = entry.amount;
-    amountCell.style.color = entry.amount < 0 ? "red" : "green";
+    row.insertCell(2).innerText = entry.amount;
     row.insertCell(3).innerText = entry.category;
   }
 }
@@ -105,23 +102,6 @@ function renderEntries() {
     row.insertCell(3).innerText = entry.category;
   }
 }
-function calculateTotal() {
-  let totalIncome = 0;
-  let totalExpense = 0;
-
-  for (let entry of entries) {
-    const amount = parseFloat(entry.amount);
-    if (amount > 0) {
-      totalIncome += amount;
-    } else {
-      totalExpense += amount;
-    }
-  }
-
-  document.getElementById("totalIncome").innerText = totalIncome;
-  document.getElementById("totalExpense").innerText = totalExpense;
-  document.getElementById("totalSum").innerText = totalIncome + totalExpense;
-}
 
 setCurrentDate();
-getEntries().then(() => calculateTotal());
+getEntries();
