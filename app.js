@@ -1,7 +1,14 @@
 let entries = [];
 
+function formatAmount(amount) {
+  return parseFloat(amount).toLocaleString("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+  });
+}
+
 function getEntries() {
-  fetch("http://localhost:3000/entries")
+  return fetch("http://localhost:3000/entries")
     .then((response) => response.json())
     .then((data) => {
       entries = data || [];
@@ -35,6 +42,16 @@ function setCurrentDate() {
   document.getElementById("currentDate").innerText = formatDate(today);
 }
 
+function deleteEntry(id) {
+  fetch(`http://localhost:3000/entries/${id}`, {
+    method: "DELETE",
+  })
+    .then(() => {
+      return getEntries();
+    })
+    .then(() => calculateTotal());
+}
+
 function addOrUpdateEntry() {
   const date = document.getElementById("entryDate").valueAsDate;
   const formattedDate = formatDate(date);
@@ -44,67 +61,40 @@ function addOrUpdateEntry() {
   const entry = {
     date: formattedDate,
     amount: amount,
-    category: category
+    category: category,
   };
 
-  // Добавим новую запись с помощью POST запроса
-  fetch("http://localhost:3000/entries", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(entry)
-  }).then(() => {
-    updateOrAddRow(entry);
-    getEntries(); // получаем обновленные данные для согласованности
-  });
-}
-
-function renderEntries() {
-  const table = document.getElementById("entries");
-  table.innerHTML = "";
-
-  for (let entry of entries) {
-    updateOrAddRow(entry);
-  }
-}
-
-function updateOrAddRow(entry) {
-  const table = document.getElementById("entries");
-  let row = Array.from(table.rows).find(
-    (r) => r.cells[1].innerText === entry.date
+  const existingEntry = entries.find(
+    (e) => e.date === formattedDate && e.category === category
   );
 
-  if (row) {
-    // Если строка для этой даты уже существует, обновите ее
-    row.cells[2].innerText = entry.amount;
-    row.cells[2].style.color = entry.amount < 0 ? "red" : "green";
-    row.cells[3].innerText = entry.category;
+  if (existingEntry) {
+    fetch(`http://localhost:3000/entries/${existingEntry.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(entry),
+    })
+      .then(() => {
+        return getEntries();
+      })
+      .then(() => calculateTotal());
   } else {
-    // Если строки нет, добавьте новую
-    row = table.insertRow();
-    row.insertCell(0).innerText = table.rows.length; // номер строки
-    row.insertCell(1).innerText = entry.date;
-    const amountCell = row.insertCell(2);
-    amountCell.innerText = entry.amount;
-    amountCell.style.color = entry.amount < 0 ? "red" : "green";
-    row.insertCell(3).innerText = entry.category;
+    fetch("http://localhost:3000/entries", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(entry),
+    })
+      .then(() => {
+        return getEntries();
+      })
+      .then(() => calculateTotal());
   }
 }
 
-function renderEntries() {
-  const table = document.getElementById("entries");
-  table.innerHTML = "";
-
-  let dayCounter = 1;
-  for (let entry of entries) {
-    const row = table.insertRow();
-    row.insertCell(0).innerText = dayCounter++;
-    row.insertCell(1).innerText = entry.date;
-    row.insertCell(2).innerText = entry.amount;
-    row.insertCell(3).innerText = entry.category;
-  }
-}
 function calculateTotal() {
   let totalIncome = 0;
   let totalExpense = 0;
@@ -118,9 +108,53 @@ function calculateTotal() {
     }
   }
 
-  document.getElementById("totalIncome").innerText = totalIncome;
-  document.getElementById("totalExpense").innerText = totalExpense;
-  document.getElementById("totalSum").innerText = totalIncome + totalExpense;
+  document.getElementById("totalIncome").innerText = formatAmount(totalIncome); // форматирование суммы
+  document.getElementById("totalExpense").innerText =
+    formatAmount(totalExpense); // форматирование суммы
+  document.getElementById("totalSum").innerText = formatAmount(
+    totalIncome + totalExpense
+  ); // форматирование суммы
+}
+
+function renderEntries() {
+  const table = document.getElementById("entries");
+  table.innerHTML = "";
+
+  for (let entry of entries) {
+    const row = table.insertRow();
+    row.insertCell(0).innerText = entry.id; // Теперь используем ID в качестве номера строки
+    row.insertCell(1).innerText = formatPaymentDate(entry.date);
+    row.insertCell(2).innerText = formatAmount(entry.amount); // форматирование суммы
+    row.insertCell(3).innerText = entry.category;
+
+    const editButtonCell = row.insertCell(4);
+    const editButton = document.createElement("button");
+    editButton.innerText = "Редактировать";
+    editButton.onclick = () => loadEntryForEdit(entry.id);
+    editButtonCell.appendChild(editButton);
+
+    const deleteButtonCell = row.insertCell(5);
+    const deleteButton = document.createElement("button");
+    deleteButton.innerText = "Удалить";
+    deleteButton.onclick = () => deleteEntry(entry.id);
+    deleteButtonCell.appendChild(deleteButton);
+  }
+}
+
+function loadEntryForEdit(id) {
+  const entry = entries.find((e) => e.id === id);
+  if (entry) {
+    document.getElementById("entryDate").value = entry.date;
+    document.getElementById("amount").value = entry.amount;
+    document.getElementById("category").value = entry.category;
+  }
+}
+
+function formatPaymentDate(payment) {
+  const [year, month, day] = payment.date.split("-");
+  const formattedDate = `${day}.${month}.${year}`;
+
+  return formattedDate;
 }
 
 setCurrentDate();
