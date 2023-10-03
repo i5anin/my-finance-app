@@ -151,11 +151,14 @@ function loadEntryForEdit(id) {
 }
 
 function formatPaymentDate(payment) {
+    if (!payment || !payment.date) {
+        console.error('Invalid payment object:', payment);
+        return '';
+    }
     const [year, month, day] = payment.date.split("-");
-    const formattedDate = `${day}.${month}.${year}`;
-
-    return formattedDate;
+    return `${day}.${month}.${year}`;
 }
+
 
 setCurrentDate();
 getEntries().then(() => calculateTotal());
