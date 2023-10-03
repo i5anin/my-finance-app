@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start_server": "npx json-server --watch db.json",
-    "start": "npx json-server --watch db.json & browser-sync start --server --files \"*.html, *.css, *.js\""
+    "start": "npx browser-sync start --server --files \"*.html, *.css, *.js\" --port 4000"
   },
   "devDependencies": {
     "browser-sync": "^2.26.16"
