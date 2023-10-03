@@ -42,12 +42,22 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <capitalization-chart :data="capitalizationData"></capitalization-chart>
+      <monthly-distribution-chart :data="monthlyDistributionData"></monthly-distribution-chart>
     </div>
   </div>
 </template>
 
 <script>
+
+import CapitalizationChart from './CapitalizationChart.vue';
+import MonthlyDistributionChart from './MonthlyDistributionChart.vue';
 export default {
+  components: {
+    CapitalizationChart,
+    MonthlyDistributionChart,
+  },
   data() {
     return {
       entries: [],
@@ -61,6 +71,16 @@ export default {
       totalSum: 0,
       currentDate: ''
     };
+  },
+  computed: {
+    capitalizationData() {
+      // ... ваш код для формирования данных для графика капитализации ...
+      return [];  // вернуть пустой массив как заглушка
+    },
+    monthlyDistributionData() {
+      // ... ваш код для формирования данных для круговой диаграммы распределения ...
+      return {};  // вернуть пустой объект как заглушка
+    },
   },
   methods: {
     getEntries() {
