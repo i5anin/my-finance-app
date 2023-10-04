@@ -5,8 +5,10 @@
 </template>
 
 <script>
-import { Chart } from 'chart.js';
+import { Chart, LinearScale, TimeScale } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+
+Chart.register(LinearScale, TimeScale);
 
 const reactiveProp = {
   props: ['chartData'],
@@ -52,6 +54,7 @@ export default {
             },
           },
           y: {
+            type: 'linear',
             title: {
               display: true,
               text: 'Капитализация (RUB)',
