@@ -88,9 +88,15 @@
                                     }
                                 },
                                 y: {
+                                    type: 'logarithmic',
                                     title: {
                                         display: true,
                                         text: 'Значение'
+                                    },
+                                    ticks: {
+                                        callback: function (value, index, values) {
+                                            return Number(value.toString());//pass tick values as a string into Number function
+                                        }
                                     }
                                 }
                             }
