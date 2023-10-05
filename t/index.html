@@ -66,17 +66,20 @@
                                 label: 'Рубли',
                                 data: financeData.map(item => item.rubles),
                                 borderColor: 'blue',
-                                fill: false
+                                fill: false,
+                                yAxisID: 'y-axis-1',
                             }, {
                                 label: 'Доллары',
                                 data: financeData.map(item => item.dollars * currencyData.dollar),
                                 borderColor: 'green',
-                                fill: false
+                                fill: false,
+                                yAxisID: 'y-axis-2',
                             }, {
                                 label: 'Золото',
                                 data: financeData.map(item => item.gold * currencyData.gold),
                                 borderColor: 'gold',
-                                fill: false
+                                fill: false,
+                                yAxisID: 'y-axis-2',
                             }]
                         },
                         options: {
@@ -87,17 +90,24 @@
                                         text: 'Дата'
                                     }
                                 },
-                                y: {
-                                    type: 'logarithmic',
+                                'y-axis-1': {
+                                    type: 'linear',
+                                    position: 'left',
                                     title: {
                                         display: true,
-                                        text: 'Значение'
-                                    },
-                                    ticks: {
-                                        callback: function (value, index, values) {
-                                            return Number(value.toString());//pass tick values as a string into Number function
-                                        }
+                                        text: 'Рубли'
                                     }
+                                },
+                                'y-axis-2': {
+                                    type: 'linear',
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: 'Доллары / Золото'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false, // только одна сетка на графике
+                                    },
                                 }
                             }
                         }
