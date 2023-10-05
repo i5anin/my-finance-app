@@ -1,0 +1,31 @@
+{
+  "financeData": [
+    {
+      "date": "01.10.2023",
+      "incomeExpense": -275.0,
+      "description": "Услуги банка",
+      "type": "Банк",
+      "rubles": 25773.2,
+      "dollars": 269.37,
+      "gold": 4.42
+    },
+    {
+      "date": "02.10.2023",
+      "incomeExpense": -1976.0,
+      "description": "Заправка топлива",
+      "type": "Авто",
+      "rubles": 23797.2,
+      "dollars": 246.14,
+      "gold": 4.08
+    },
+    {
+      "date": "03.10.2023",
+      "incomeExpense": -1976.0,
+      "description": "Заправка топлива",
+      "type": "Авто",
+      "rubles": 23797.2,
+      "dollars": 246.14,
+      "gold": 4.09
+    }
+  ]
+}

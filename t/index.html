@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый отчет</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<table border="1" id="financeTable">
+    <tr>
+        <th>Дата</th>
+        <th>Доход/Расход</th>
+        <th>Пояснение</th>
+        <th>Тип</th>
+        <th>Рубли</th>
+        <th>Доллары</th>
+        <th>Золото</th>
+    </tr>
+    <!-- данные будут добавлены динамически -->
+</table>
+
+<canvas id="myChart" width="400" height="200"></canvas>
+
+<script>
+    async function fetchFinanceData() {
+        const response = await axios.get('data.json');
+        return response.data.financeData;
+    }
+
+    async function fetchCurrencyData() {
+        // Предположим, что API возвращает объект с полями 'dollar' и 'gold'
+        const response = await axios.get('https://api.example.com/currency');
+        return response.data;
+    }
+
+    async function renderTableAndChart() {
+        const financeData = await fetchFinanceData();
+        const currencyData = await fetchCurrencyData();
+
+        const table = document.getElementById('financeTable');
+        financeData.forEach(item => {
+            const row = table.insertRow();
+            ['date', 'incomeExpense', 'description', 'type', 'rubles', 'dollars', 'gold'].forEach(key => {
+                const cell = row.insertCell();
+                cell.textContent = item[key];
+            });
+        });
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: financeData.map(item => item.date),
+                datasets: [{
+                    label: 'Рубли',
+                    data: financeData.map(item => item.rubles),
+                    borderColor: 'blue',
+                    fill: false
+                }, {
+                    label: 'Доллары',
+                    data: financeData.map(item => item.dollars * currencyData.dollar),
+                    borderColor: 'green',
+                    fill: false
+                }, {
+                    label: 'Золото',
+                    data: financeData.map(item => item.gold * currencyData.gold),
+                    borderColor: 'gold',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Дата'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Значение'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    renderTableAndChart();
+</script>
+
+</body>
+</html>
