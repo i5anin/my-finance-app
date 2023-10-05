@@ -36,20 +36,17 @@
                 }
             }
 
-            async function fetchCurrencyData() {
-                try {
-                    // Предположим, что API возвращает объект с полями 'dollar' и 'gold'
-                    const response = await axios.get('https://api.example.com/currency');
-                    return response.data;
-                } catch (error) {
-                    console.error('Ошибка при получении данных о валюте:', error);
-                }
-            }
-
             async function renderTableAndChart() {
                 try {
                     const financeData = await fetchFinanceData();
-                    const currencyData = await fetchCurrencyData();
+
+                    // Захардкодим значения для доллара и золота
+                    const currencyData = { dollar: 1, gold: 1 };
+
+                    if (!financeData) {
+                        console.error('Не удалось получить все необходимые данные');
+                        return;  // завершить выполнение функции, если данные отсутствуют
+                    }
 
                     const table = document.getElementById('financeTable');
                     financeData.forEach(item => {
