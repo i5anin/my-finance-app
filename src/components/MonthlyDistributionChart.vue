@@ -16,7 +16,7 @@ export default {
     },
   },
   mounted() {
-    this.renderChart(this.chartData, {
+    this._chart = new Chart(this.$refs.chart, {
       plugins: {
         legend: {
           position: 'right',
