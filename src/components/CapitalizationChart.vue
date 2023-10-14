@@ -36,13 +36,8 @@ const reactiveProp = {
 
 export default {
   mixins: [reactiveProp],
-  data() {
-    return {
-      _chart: null,  // добавьте это
-    };
-  },
   mounted() {
-    this._chart = new Chart(this.$refs.chart, {  // измените это
+    new Chart(this.$refs.chart, {
       type: 'line',
       data: this._chartData,
       options: {
@@ -71,4 +66,3 @@ export default {
   },
 };
 </script>
-
