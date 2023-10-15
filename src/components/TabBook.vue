@@ -46,8 +46,9 @@
 
 <script>
 // Импорт функций API
+// Импорт функций API
 import {addOrUpdateEntry, deleteEntry, getEntries} from '@/api';
-import dayjs from 'dayjs';
+import moment from 'moment';
 
 export default {
   data() {
@@ -93,7 +94,7 @@ export default {
       }
       // Проверяем, является ли amount числом
       if (!isNaN(amount)) {
-        console.log('Amount:', amount);
+        // console.log('Amount:', amount);
         return this.formatCurrency(amount);
       } else {
         console.error('Amount is not a number:', amount);
@@ -104,13 +105,14 @@ export default {
       if (typeof dateString === 'object' && dateString.date) {
         dateString = dateString.date;
       }
-      const date = dayjs(dateString);
+      const date = moment(dateString, 'DD.MM.YYYY');
       if (!date.isValid()) {
         console.error('Invalid date:', dateString);
         return 'Invalid Date';
       }
       return date.format('DD.MM.YYYY');
     },
+
 
     formatCurrency(value) {
       return parseFloat(value).toLocaleString("ru-RU", {
@@ -142,7 +144,7 @@ export default {
           });
     },
     addOrUpdateEntry() {
-      const formattedDate = dayjs(this.form.date).format('YYYY-MM-DD'); // Форматируем дату
+      const formattedDate = moment(this.form.date).format('YYYY-MM-DD'); // Форматируем дату
       const entry = {
         date: formattedDate,
         amount: this.form.amount,
@@ -178,7 +180,7 @@ export default {
       const entry = this.entries.find(e => e.id === id);
       if (entry) {
         const dateObj = new Date(entry.date);
-        this.form.date = dayjs(dateObj).format('YYYY-MM-DD');
+        this.form.date = moment(dateObj).format('YYYY-MM-DD');
         this.form.amount = entry.amount;
         this.form.category = entry.category;
         this.form.id = entry.id;
@@ -210,5 +212,9 @@ export default {
   width: 45%; /* можно изменить в зависимости от ваших потребностей */
 }
 </style>
+
+
+
+
 
 
