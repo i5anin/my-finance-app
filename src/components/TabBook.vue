@@ -1,5 +1,9 @@
 <template>
   <div class="container">
+    <div class="chart-section">
+      <h3 class="mt-4">График:</h3>
+      <BarChart :labels="chartLabels" :incomes="chartIncomes" :expenses="chartExpenses" />
+    </div>
     <div class="form-section">
       <h3 class="mt-4">Добавить или изменить запись:</h3>
       <el-form ref="form" :model="form" label-position="top">
@@ -49,8 +53,12 @@
 // Импорт функций API
 import {addOrUpdateEntry, deleteEntry, getEntries} from '@/api';
 import moment from 'moment';
-
+import BarChart from '@/components/BarChart.vue';  // Путь может отличаться в зависимости от вашей структуры проекта
 export default {
+  components: {
+    BarChart,
+    // ... возможно, другие компоненты
+  },
   data() {
     return {
       totalIncome: 0,
