@@ -1,9 +1,5 @@
 <template>
   <div class="container">
-    <div class="chart-section">
-      <h3 class="mt-4">График доходов и расходов:</h3>
-      <BarChart :data="chartData" />
-    </div>
     <div class="form-section">
       <h3 class="mt-4">Добавить или изменить запись:</h3>
       <el-form ref="form" :model="form" label-position="top">
@@ -50,14 +46,11 @@
 
 <script>
 // Импорт функций API
+// Импорт функций API
 import {addOrUpdateEntry, deleteEntry, getEntries} from '@/api';
-import BarChart from '@/components/BarChart.vue';
 import moment from 'moment';
 
 export default {
-  components: {
-    BarChart,
-  },
   data() {
     return {
       totalIncome: 0,
@@ -203,24 +196,6 @@ export default {
 
 
 <style>
-.container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 20px;
-}
-
-.form-section,
-.stats-section {
-  width: 45%; /* можно изменить в зависимости от ваших потребностей */
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;700&display=swap');
-
-body {
-  font-family: 'Ubuntu', sans-serif;
-}
-
 .container {
   display: flex;
   flex-direction: row;
