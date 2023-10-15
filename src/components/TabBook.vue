@@ -42,22 +42,14 @@
           </template>
         </el-table-column>
       </el-table>
-
-      <capitalization-chart :data="capitalizationData"></capitalization-chart>
-      <monthly-distribution-chart :data="monthlyDistributionData"></monthly-distribution-chart>
     </div>
   </div>
 </template>
-
 <script>
+// Импорт функций API
+import {getEntries, deleteEntry, addOrUpdateEntry} from '@/api';
 
-import CapitalizationChart from './CapitalizationChart.vue';
-import MonthlyDistributionChart from './MonthlyDistributionChart.vue';
 export default {
-  components: {
-    CapitalizationChart,
-    MonthlyDistributionChart,
-  },
   data() {
     return {
       entries: [],
@@ -72,28 +64,39 @@ export default {
       currentDate: ''
     };
   },
-  computed: {
-    capitalizationData() {
-      // ... ваш код для формирования данных для графика капитализации ...
-      return [];  // вернуть пустой массив как заглушка
-    },
-    monthlyDistributionData() {
-      // ... ваш код для формирования данных для круговой диаграммы распределения ...
-      return {};  // вернуть пустой объект как заглушка
-    },
-  },
   methods: {
     getEntries() {
-      fetch("http://localhost:3000/entries")
-          .then(response => response.json())
+      return getEntries()
           .then(data => {
-            this.entries = data || [];
-            this.calculateTotal();
+            this.entries = data;
+          })
+          .catch(error => {
+            console.error('Error fetching entries:', error);
+          });
+    },
+    deleteEntry,
+
+    addOrUpdateEntry() {
+      const entry = {
+        date: this.formatDateForServer(this.form.date),
+        amount: this.form.amount,
+        category: this.form.category,
+      };
+      const id = this.form.id ? this.form.id : null;
+
+      // Вызовите функцию addOrUpdateEntry из файла api.js с параметром entry и id
+      addOrUpdateEntry(entry, id)
+          .then(() => {
+            return this.getEntries();
           });
     },
     formatDate(row, column, cellValue) {
       const date = new Date(cellValue);
       return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    },
+    formatDateForServer(date) {
+      const d = new Date(date);
+      return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
     },
     formatAmount(row, column, cellValue) {
       return parseFloat(cellValue).toLocaleString("ru-RU", {
@@ -105,36 +108,9 @@ export default {
       const today = new Date();
       this.currentDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
     },
-    deleteEntry(id) {
-      fetch(`http://localhost:3000/entries/${id}`, {
-        method: "DELETE",
-      })
-          .then(() => {
-            return this.getEntries();
-          });
-    },
-    addOrUpdateEntry() {
-      const entry = {
-        date: this.form.date,
-        amount: this.form.amount,
-        category: this.form.category,
-      };
-
-      fetch("http://localhost:3000/entries", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(entry),
-      })
-          .then(() => {
-            return this.getEntries();
-          });
-    },
     calculateTotal() {
       let totalIncome = 0;
       let totalExpense = 0;
-
       for (let entry of this.entries) {
         const amount = parseFloat(entry.amount);
         if (amount > 0) {
@@ -143,7 +119,6 @@ export default {
           totalExpense += amount;
         }
       }
-
       this.totalIncome = totalIncome.toLocaleString("ru-RU", {
         style: "currency",
         currency: "RUB",
@@ -163,13 +138,13 @@ export default {
         this.form.date = entry.date;
         this.form.amount = entry.amount;
         this.form.category = entry.category;
+        this.form.id = entry.id;  // сохраните id в форме
       }
     }
   },
   mounted() {
     this.setCurrentDate();
     this.getEntries();
-
     // Установка даты по умолчанию
     const today = new Date();
     this.form.date = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -177,6 +152,4 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Ваши стили */
-</style>
+
