@@ -46,7 +46,7 @@
 
 <script>
 // Импорт функций API
-import {getEntries, deleteEntry, addOrUpdateEntry} from '@/api';
+import {addOrUpdateEntry, deleteEntry, getEntries} from '@/api';
 import dayjs from 'dayjs';
 
 export default {
@@ -78,11 +78,40 @@ export default {
   },
   methods: {
     formatAmount(amount) {
-      return this.formatCurrency(amount);
+      // Проверяем, является ли amount строкой
+      if (typeof amount === 'string') {
+        // Удаляем пробелы и заменяем запятую на точку для правильного преобразования в число
+        amount = parseFloat(amount.replace(/ /g, '').replace(',', '.'));
+      } else if (typeof amount === 'number') {
+        // Если amount уже число, то оставляем его как есть
+        amount = parseFloat(amount);
+      } else if (typeof amount === 'object') {
+        // Если amount - это объект (как в случае с "Proxy(Object)"), попробуем получить значение amount из этого объекта
+        if (amount.amount) {
+          amount = parseFloat(amount.amount);
+        }
+      }
+      // Проверяем, является ли amount числом
+      if (!isNaN(amount)) {
+        console.log('Amount:', amount);
+        return this.formatCurrency(amount);
+      } else {
+        console.error('Amount is not a number:', amount);
+        return 'не число ₽';
+      }
     },
-    formatDate(date, format = 'DD.MM.YYYY') {
-      return dayjs(date).format(format);
+    formatDate(dateString) {
+      if (typeof dateString === 'object' && dateString.date) {
+        dateString = dateString.date;
+      }
+      const date = dayjs(dateString);
+      if (!date.isValid()) {
+        console.error('Invalid date:', dateString);
+        return 'Invalid Date';
+      }
+      return date.format('DD.MM.YYYY');
     },
+
     formatCurrency(value) {
       return parseFloat(value).toLocaleString("ru-RU", {
         style: "currency",
@@ -92,7 +121,11 @@ export default {
     getEntries() {
       return getEntries()
           .then(data => {
-            this.entries = data;
+            this.entries = data.map(entry => ({
+              ...entry,
+              originalDate: entry.date,
+              date: this.formatDate(entry.date)
+            }));
           })
           .then(() => {
             this.calculateTotal();
@@ -101,6 +134,7 @@ export default {
             console.error('Error fetching entries:', error);
           });
     },
+
     deleteEntry(id) {
       deleteEntry(id)
           .then(() => {
@@ -108,8 +142,9 @@ export default {
           });
     },
     addOrUpdateEntry() {
+      const formattedDate = dayjs(this.form.date).format('YYYY-MM-DD'); // Форматируем дату
       const entry = {
-        date: new Date(this.form.date).toISOString(),
+        date: formattedDate,
         amount: this.form.amount,
         category: this.form.category,
       };
@@ -142,12 +177,15 @@ export default {
     loadEntryForEdit(id) {
       const entry = this.entries.find(e => e.id === id);
       if (entry) {
-        this.form.date = entry.date;
+        const dateObj = new Date(entry.date);
+        this.form.date = dayjs(dateObj).format('YYYY-MM-DD');
         this.form.amount = entry.amount;
         this.form.category = entry.category;
         this.form.id = entry.id;
       }
-    }
+    },
+
+
   },
   mounted() {
     this.setCurrentDate();
