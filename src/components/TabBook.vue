@@ -1,16 +1,8 @@
 <template>
-  <div>
-    <div>
-      <h3 class="mt-4">Общая статистика:</h3>
-      <div>
-        <span>Общий доход: </span><span>{{ totalIncome }}</span><br>
-        <span>Общий расход: </span><span>{{ totalExpense }}</span><br>
-        <span>Общая сумма: </span><span>{{ totalSum }}</span>
-      </div>
-
-      <h2>Текущая дата: {{ currentDate }}</h2>
+  <div class="container">
+    <div class="form-section">
       <h3 class="mt-4">Добавить или изменить запись:</h3>
-      <el-form ref="form" :model="form" label-width="120px">
+      <el-form ref="form" :model="form" label-position="top">
         <el-form-item label="Дата">
           <el-date-picker v-model="form.date" type="date" placeholder="Выберите дату"></el-date-picker>
         </el-form-item>
@@ -28,23 +20,32 @@
           <el-button type="primary" @click="addOrUpdateEntry">Добавить/Обновить</el-button>
         </el-form-item>
       </el-form>
-
-      <h3 class="mt-4">Записи:</h3>
-      <el-table :data="entries">
-        <el-table-column prop="id" label="№"></el-table-column>
-        <el-table-column prop="date" label="Дата" :formatter="formatDate"></el-table-column>
-        <el-table-column prop="amount" label="Сумма" :formatter="formatAmount"></el-table-column>
-        <el-table-column prop="category" label="Категория"></el-table-column>
-        <el-table-column label="Действия">
-          <template v-slot="scope">
-            <el-button @click="loadEntryForEdit(scope.row.id)">Редактировать</el-button>
-            <el-button @click="deleteEntry(scope.row.id)">Удалить</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    </div>
+    <div class="stats-section">
+      <h3 class="mt-4">Общая статистика:</h3>
+      <div>
+        <span>Общий доход: </span><span>{{ totalIncome }}</span><br>
+        <span>Общий расход: </span><span>{{ totalExpense }}</span><br>
+        <span>Общая сумма: </span><span>{{ totalSum }}</span><br>
+        <span>Текущая дата: </span><span>{{ currentDate }}</span>
+      </div>
     </div>
   </div>
+  <h3 class="mt-4">Записи:</h3>
+  <el-table :data="entries">
+    <el-table-column prop="id" label="№"></el-table-column>
+    <el-table-column prop="date" label="Дата" :formatter="formatDate"></el-table-column>
+    <el-table-column prop="amount" label="Сумма" :formatter="formatAmount"></el-table-column>
+    <el-table-column prop="category" label="Категория"></el-table-column>
+    <el-table-column label="Действия">
+      <template v-slot="scope">
+        <el-button @click="loadEntryForEdit(scope.row.id)">Редактировать</el-button>
+        <el-button @click="deleteEntry(scope.row.id)">Удалить</el-button>
+      </template>
+    </el-table-column>
+  </el-table>
 </template>
+
 <script>
 // Импорт функций API
 import {getEntries, deleteEntry, addOrUpdateEntry} from '@/api';
@@ -151,5 +152,20 @@ export default {
   }
 };
 </script>
+
+
+<style>
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.form-section,
+.stats-section {
+  width: 45%; /* можно изменить в зависимости от ваших потребностей */
+}
+</style>
 
 
