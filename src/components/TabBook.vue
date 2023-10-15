@@ -32,7 +32,7 @@
   <h3 class="mt-4">Записи:</h3>
   <el-table :data="entries">
     <el-table-column prop="id" label="№"></el-table-column>
-    <el-table-column prop="date" label="Дата" :formatter="formatDate"></el-table-column>
+    <el-table-column prop="date" label="Дата"></el-table-column>
     <el-table-column prop="amount" label="Сумма" :formatter="formatAmount"></el-table-column>
     <el-table-column prop="category" label="Категория"></el-table-column>
     <el-table-column label="Действия">
@@ -102,16 +102,14 @@ export default {
       }
     },
     formatDate(dateString) {
-      if (typeof dateString === 'object' && dateString.date) {
-        dateString = dateString.date;
-      }
-      const date = moment(dateString, 'DD.MM.YYYY');
+      const date = moment(dateString, 'YYYY-MM-DD');
       if (!date.isValid()) {
         console.error('Invalid date:', dateString);
         return 'Invalid Date';
       }
       return date.format('DD.MM.YYYY');
     },
+
 
 
     formatCurrency(value) {
