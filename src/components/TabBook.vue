@@ -23,12 +23,10 @@
     </div>
     <div class="stats-section">
       <h3 class="mt-4">Общая статистика:</h3>
-      <div>
-        <span>Общий доход: </span><span>{{ totalIncome }}</span><br>
-        <span>Общий расход: </span><span>{{ totalExpense }}</span><br>
-        <span>Общая сумма: </span><span>{{ totalSum }}</span><br>
-        <span>Текущая дата: </span><span>{{ currentDate }}</span>
-      </div>
+      <el-table :data="tableData" border style="width: 100%">
+        <el-table-column prop="label" label="" width="180"/>
+        <el-table-column prop="value" label="Данные"/>
+      </el-table>
     </div>
   </div>
   <h3 class="mt-4">Записи:</h3>
@@ -49,65 +47,82 @@
 <script>
 // Импорт функций API
 import {getEntries, deleteEntry, addOrUpdateEntry} from '@/api';
+import dayjs from 'dayjs';
 
 export default {
   data() {
     return {
+      totalIncome: 0,
+      totalExpense: 0,
+      totalSum: 0,
+      currentDate: '',
+
       entries: [],
       form: {
         date: '',
         amount: '',
         category: 'Еда'  // Категория по умолчанию
       },
-      totalIncome: 0,
-      totalExpense: 0,
-      totalSum: 0,
-      currentDate: ''
+
     };
   },
+  computed: {
+    tableData() {
+      return [
+        {label: 'Общий доход', value: this.formatCurrency(this.totalIncome)},
+        {label: 'Общий расход', value: this.formatCurrency(this.totalExpense)},
+        {label: 'Общая сумма', value: this.formatCurrency(this.totalSum)},
+        {label: 'Текущая дата', value: this.formatDate(this.currentDate)}
+      ];
+    },
+  },
   methods: {
+    formatAmount(amount) {
+      return this.formatCurrency(amount);
+    },
+    formatDate(date, format = 'DD.MM.YYYY') {
+      return dayjs(date).format(format);
+    },
+    formatCurrency(value) {
+      return parseFloat(value).toLocaleString("ru-RU", {
+        style: "currency",
+        currency: "RUB",
+      });
+    },
     getEntries() {
       return getEntries()
           .then(data => {
             this.entries = data;
           })
+          .then(() => {
+            this.calculateTotal();
+          })
           .catch(error => {
             console.error('Error fetching entries:', error);
           });
     },
-    deleteEntry,
-
+    deleteEntry(id) {
+      deleteEntry(id)
+          .then(() => {
+            return this.getEntries();
+          });
+    },
     addOrUpdateEntry() {
       const entry = {
-        date: this.formatDateForServer(this.form.date),
+        date: new Date(this.form.date).toISOString(),
         amount: this.form.amount,
         category: this.form.category,
       };
       const id = this.form.id ? this.form.id : null;
 
-      // Вызовите функцию addOrUpdateEntry из файла api.js с параметром entry и id
       addOrUpdateEntry(entry, id)
           .then(() => {
             return this.getEntries();
           });
     },
-    formatDate(row, column, cellValue) {
-      const date = new Date(cellValue);
-      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    },
-    formatDateForServer(date) {
-      const d = new Date(date);
-      return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
-    },
-    formatAmount(row, column, cellValue) {
-      return parseFloat(cellValue).toLocaleString("ru-RU", {
-        style: "currency",
-        currency: "RUB",
-      });
-    },
     setCurrentDate() {
       const today = new Date();
-      this.currentDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+      this.currentDate = this.formatDate(today, 'YYYY-MM-DD');
     },
     calculateTotal() {
       let totalIncome = 0;
@@ -120,18 +135,9 @@ export default {
           totalExpense += amount;
         }
       }
-      this.totalIncome = totalIncome.toLocaleString("ru-RU", {
-        style: "currency",
-        currency: "RUB",
-      });
-      this.totalExpense = totalExpense.toLocaleString("ru-RU", {
-        style: "currency",
-        currency: "RUB",
-      });
-      this.totalSum = (totalIncome + totalExpense).toLocaleString("ru-RU", {
-        style: "currency",
-        currency: "RUB",
-      });
+      this.totalIncome = totalIncome;  // keep as number
+      this.totalExpense = totalExpense;  // keep as number
+      this.totalSum = totalIncome + totalExpense;  // keep as number
     },
     loadEntryForEdit(id) {
       const entry = this.entries.find(e => e.id === id);
@@ -139,16 +145,15 @@ export default {
         this.form.date = entry.date;
         this.form.amount = entry.amount;
         this.form.category = entry.category;
-        this.form.id = entry.id;  // сохраните id в форме
+        this.form.id = entry.id;
       }
     }
   },
   mounted() {
     this.setCurrentDate();
     this.getEntries();
-    // Установка даты по умолчанию
     const today = new Date();
-    this.form.date = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    this.form.date = this.formatDate(today, 'YYYY-MM-DD'); // Initialize form.date in 'YYYY-MM-DD' format
   }
 };
 </script>

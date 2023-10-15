@@ -14,6 +14,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "core-js": "^3.8.3",
     "crypto-js": "^4.1.1",
+    "dayjs": "^1.11.10",
     "element-plus": "^2.3.5",
     "vue": "^3.2.13",
     "vue-chartjs": "^5.2.0",
