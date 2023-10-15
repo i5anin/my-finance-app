@@ -97,14 +97,12 @@ export default {
         // console.log('Amount:', amount);
         return this.formatCurrency(amount);
       } else {
-        console.error('Amount is not a number:', amount);
         return 'не число ₽';
       }
     },
     formatDate(dateString) {
       const date = moment(dateString, 'YYYY-MM-DD');
       if (!date.isValid()) {
-        console.error('Invalid date:', dateString);
         return 'Invalid Date';
       }
       return date.format('DD.MM.YYYY');
@@ -157,7 +155,7 @@ export default {
     },
     setCurrentDate() {
       const today = new Date();
-      this.currentDate = this.formatDate(today, 'YYYY-MM-DD');
+      this.currentDate = moment(today).format('YYYY-MM-DD');
     },
     calculateTotal() {
       let totalIncome = 0;
