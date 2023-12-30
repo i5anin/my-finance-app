@@ -3,53 +3,52 @@
     <!-- Форма для ввода данных -->
     <v-form>
       <!-- Поле для категории -->
-      <v-text-field label="Категория" v-model="entry.category"></v-text-field>
+      <v-text-field label="Категория" v-model="entry.category" />
+
       <!-- Поле для суммы -->
-      <v-text-field label="Сумма" v-model="entry.amount" type="number"></v-text-field>
+      <v-text-field label="Сумма" v-model="entry.amount" type="number" />
+
       <!-- Поле для пояснения -->
-      <v-textarea label="Пояснение" v-model="entry.description"></v-textarea>
+      <v-textarea label="Пояснение" v-model="entry.description" />
+
       <!-- Выбор даты -->
-      <v-menu v-model="menu" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field v-model="entry.date" label="Дата" readonly v-bind="attrs" v-on="on"></v-text-field>
+      <v-menu v-model="menu" close-on-content-click="false" nudge-right="40" offset-y min-width="290px">
+        <template v-slot:activator="{ attrs, on }">
+          <v-text-field v-model="entry.date" label="Дата" readonly v-bind="attrs" v-on="on" />
         </template>
         <v-date-picker v-model="entry.date" no-title scrollable>
           <v-spacer></v-spacer>
           <v-btn text color="primary" @click="menu = false">Отмена</v-btn>
-          <v-btn text color="primary" @click="$refs.menu.save(entry.date)">OK</v-btn>
+          <v-btn text color="primary" @click="saveDate">OK</v-btn>
         </v-date-picker>
       </v-menu>
+
       <!-- Кнопка добавления данных -->
       <v-btn color="primary" @click="addEntry">Добавить</v-btn>
     </v-form>
+
     <!-- Таблица для отображения данных -->
-    <v-data-table :headers="headers" :items="entries" :items-per-page="5" class="elevation-1"></v-data-table>
+    <v-data-table :headers="headers" :items="entries" items-per-page="5" class="elevation-1" />
   </v-container>
 </template>
-
-
 <script>
 import { apiFinance } from '@/api';
 export default {
   data() {
     return {
-      // Объект для хранения данных из формы
       entry: {
         category: '',
         amount: 0,
         description: '',
         date: new Date().toISOString().substr(0, 10),
       },
-      // Массив для хранения всех записей
       entries: [],
-      // Заголовки для таблицы
       headers: [
         { text: 'Дата', value: 'date' },
         { text: 'Категория', value: 'category' },
         { text: 'Сумма', value: 'amount' },
         { text: 'Пояснение', value: 'description' },
       ],
-      // Управление меню выбора даты
       menu: false,
     };
   },
@@ -71,13 +70,12 @@ export default {
         console.error('Ошибка при добавлении записи:', error);
       }
     },
-
-    // Метод для очистки формы
     clearForm() {
       this.entry = { category: '', amount: 0, description: '', date: new Date().toISOString().substr(0, 10) };
     },
+    saveDate() {
+      this.menu = false;
+    }
   },
 };
 </script>
-
-
