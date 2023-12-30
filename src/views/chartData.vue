@@ -1,51 +1,100 @@
 <template>
-  <Responsive class="w-full">
-    <template #main="{ width }">
-      <Chart
-        direction="circular"
-        :size="{ width, height: 400 }"
-        :data="data"
-        :margin="{
-          left: Math.round((width - 360)/2),
-          top: 20,
-          right: 0,
-          bottom: 20
-        }"
-        :axis="axis"
-        :config="{ controlHover: false }"
-      >
-        <template #layers>
-          <Pie
-            :dataKeys="['name', 'pl']"
-            :pie-style="{ innerRadius: 100, padAngle: 0.05 }" />
-        </template>
-        <template #widgets>
-          <Tooltip
-            :config="{
-              name: { },
-              avg: { hide: true},
-              pl: { label: 'value' },
-              inc: { hide: true }
-            }"
-            hideLine
-          />
-        </template>
-      </Chart>
-    </template>
-  </Responsive>
+  <div style="width: 400px">
+    <div style="display: flex; justify-content: center">
+      <button type="button" @click="shuffleData">Add data</button>
+    </div>
+    <DoughnutChart v-bind="doughnutChartProps" />
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { Chart, Responsive, Pie, Tooltip } from 'vue3-charts'
-import { plByMonth } from './data.js'
+<script lang='ts'>
+import { computed, defineComponent, ref } from "vue";
+import { shuffle } from "lodash";
+import { DoughnutChart, useDoughnutChart } from "vue-chart-3";
+import { Chart, ChartData, ChartOptions, registerables } from "chart.js";
 
+Chart.register(...registerables);
 export default defineComponent({
-  name: 'LineChart',
-  components: { Chart, Responsive, Pie, Tooltip },
+  name: "App",
+  components: { DoughnutChart },
   setup() {
-    const data = ref(plByMonth)
-    return { data }
-  }
-})
+    const dataValues = ref([30, 40, 60, 70, 5]);
+    const dataLabels = ref(["Paris", "Nîmes", "Toulon", "Perpignan", "Autre"]);
+    const toggleLegend = ref(true);
+
+    const testData = computed<ChartData<"doughnut">>(() => ({
+      labels: dataLabels.value,
+      datasets: [
+        {
+          data: dataValues.value,
+          backgroundColor: [
+            "#77CEFF",
+            "#0079AF",
+            "#123E6B",
+            "#97B0C4",
+            "#A5C8ED",
+          ],
+        },
+      ],
+    }));
+
+    const options = computed<ChartOptions<"doughnut">>(() => ({
+      scales: {
+        myScale: {
+          type: "logarithmic",
+          position: toggleLegend.value ? "left" : "right",
+        },
+      },
+      plugins: {
+        legend: {
+          position: toggleLegend.value ? "top" : "bottom",
+        },
+        title: {
+          display: true,
+          text: "Chart.js Doughnut Chart",
+        },
+      },
+    }));
+
+    const { doughnutChartProps, doughnutChartRef } = useDoughnutChart({
+      chartData: testData,
+      options,
+    });
+
+    let index = ref(20);
+
+    function shuffleData() {
+      // dataValues.value = shuffle(dataValues.value);
+      dataValues.value.push(index.value);
+      dataLabels.value.push("Other" + index.value);
+      console.log(dataValues.value);
+      console.log(doughnutChartRef.value.chartInstance);
+      index.value++;
+    }
+
+    function switchLegend() {
+      toggleLegend.value = !toggleLegend.value;
+    }
+
+    return {
+      shuffleData,
+      switchLegend,
+      testData,
+      options,
+      doughnutChartRef,
+      doughnutChartProps,
+    };
+  },
+});
 </script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
