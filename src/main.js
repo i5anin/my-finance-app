@@ -1,13 +1,13 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-// import store from "@/store/store.js";
-import ElementPlus from "element-plus";
-import "element-plus/dist/index.css";
+// main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router' //файл маршрутизации
+import { registerPlugins } from './plugins'
+import store from './store/store'
+import '@fontsource/nunito' // импорт шрифта Nunito
 
-import "element-plus/theme-chalk/dark/css-vars.css";
-
-// Создайте экземпляр приложения Vue и передайте хранилище в качестве опции
-const app = createApp(App);
-app.use(ElementPlus);
-// app.use(store);
-app.mount("#app");
+const app = createApp(App)
+registerPlugins(app)
+app.use(router)
+app.use(store)
+app.mount('#app')
