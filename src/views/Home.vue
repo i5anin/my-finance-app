@@ -29,6 +29,7 @@
 
 
 <script>
+import { apiFinance } from '@/api';
 export default {
   data() {
     return {
@@ -52,15 +53,25 @@ export default {
       menu: false,
     };
   },
+  async created() {
+    try {
+      this.entries = await apiFinance.fetchEntries();
+    } catch (error) {
+      console.error('Ошибка при загрузке данных:', error);
+    }
+  },
   methods: {
-    // Метод для добавления записи
-    addEntry() {
-      this.entries.push({ ...this.entry });
-      // Сортировка записей по дате
-      this.entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-      // Очистка формы после добавления записи
-      this.clearForm();
+    async addEntry() {
+      try {
+        const newEntry = await apiFinance.addEntry(this.entry);
+        this.entries.push(newEntry);
+        this.entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+        this.clearForm();
+      } catch (error) {
+        console.error('Ошибка при добавлении записи:', error);
+      }
     },
+
     // Метод для очистки формы
     clearForm() {
       this.entry = { category: '', amount: 0, description: '', date: new Date().toISOString().substr(0, 10) };
