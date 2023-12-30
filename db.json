@@ -1,9 +1,32 @@
 {
-  "posts": [
-    { "id": 1, "title": "json-server", "author": "typicode" }
-  ],
-  "comments": [
-    { "id": 1, "body": "some comment", "postId": 1 }
-  ],
-  "profile": { "name": "typicode" }
+  "finance": [
+    {
+      "category": "",
+      "amount": 0,
+      "description": "",
+      "date": "2023-12-30",
+      "id": 1
+    },
+    {
+      "category": "",
+      "amount": 0,
+      "description": "",
+      "date": "2023-12-30",
+      "id": 2
+    },
+    {
+      "category": "",
+      "amount": 0,
+      "description": "",
+      "date": "2023-12-30",
+      "id": 3
+    },
+    {
+      "category": "12312",
+      "amount": "123",
+      "description": "123123",
+      "date": "2023-12-30",
+      "id": 4
+    }
+  ]
 }

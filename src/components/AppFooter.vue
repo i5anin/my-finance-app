@@ -3,13 +3,13 @@
     Все права защищены 2023
     <v-spacer />
     <span :class="{ 'text-red': isBuildDatabase }">
-      Версия {{ databaseInfo.databaseType }}
+<!--      Версия {{ databaseInfo.databaseType }}-->
     </span>
   </v-footer>
 </template>
 
 <script>
-import { getDatabaseInfo } from '@/api'
+// import { getDatabaseInfo } from '@/api'
 
 export default {
   name: 'AppFooter',
@@ -25,7 +25,7 @@ export default {
   },
   async mounted() {
     try {
-      this.databaseInfo = await getDatabaseInfo()
+      // this.databaseInfo = await getDatabaseInfo()
     } catch (error) {
       console.error('Failed to load database info:', error)
     }
