@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <chart-data></chart-data>
     <v-row>
       <v-col cols="12">
         <div class="flex">
@@ -66,8 +67,10 @@
 
 <script>
 import { getFinanceEntries, updateFinanceEntry, addFinanceEntry, deleteFinanceEntry } from '@/api'
+import ChartData from "@/views/chartData.vue";
 
 export default {
+  components: { ChartData },
   data() {
     return {
       financeEntries: [],
