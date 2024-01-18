@@ -1,8 +1,2 @@
-export * from './api_finance'
-
-
-export * from './api_login'
-export * from './api_nom'
-export * from './api_param'
-export * from './api_sklad'
-export * from './api_tree'
+export * from './get_nom'
+export * from './get_param'

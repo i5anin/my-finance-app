@@ -9,21 +9,21 @@
         </v-btn>
 
         <!-- Рекурсивное отображение дерева -->
-        <v-list-item-group class="mt-3">
+        <v-list-item class="mt-3">
           <tree-node
             v-for="node in treeData"
             :key="node.id"
             :node="node"
             @refresh-node="refreshTreeData"
           />
-        </v-list-item-group>
+        </v-list-item>
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import { getTree } from '@/api'
+import { toolTreeApi } from '@/modules/tool/api/tree'
 import TreeNode from '../TreeNode.vue'
 
 export default {
@@ -39,7 +39,7 @@ export default {
   methods: {
     async refreshTreeData() {
       try {
-        const updatedTree = await getTree()
+        const updatedTree = await toolTreeApi.getTree()
         if (updatedTree && updatedTree.length > 0) {
           this.treeData = updatedTree
         }

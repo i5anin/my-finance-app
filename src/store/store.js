@@ -1,10 +1,10 @@
 import Vuex from 'vuex'
-import { store as ToolModelStore } from '@/modules/tool/store'
+import EditorToolStore from '@/modules/editor-tool/store'
+import StorageToolStore from '@/modules/storage-tool/store'
+import IssueToolStore from '@/modules/issue-tool/store'
 
 const store = new Vuex.Store({
-  modules: {
-    tool: ToolModelStore,
-  },
+  modules: { StorageToolStore, IssueToolStore, EditorToolStore },
 })
 
 export default store
