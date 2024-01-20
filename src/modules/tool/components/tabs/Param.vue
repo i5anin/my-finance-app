@@ -28,7 +28,7 @@
               </td>
               <td>{{ transaction.comment }}</td>
               <td>{{ transaction.category }}</td>
-              <td>{{ transaction.timestamp }}</td>
+              <td>{{ formatDate(transaction.timestamp) }}</td>
             </tr>
           </tbody>
         </v-table>
@@ -39,6 +39,7 @@
 
 <script>
 import { transactionsApi } from '../../api/transactions'
+import { format, parseISO } from 'date-fns'
 
 export default {
   data() {
@@ -47,6 +48,10 @@ export default {
     }
   },
   methods: {
+    formatDate(timestamp) {
+      const date = parseISO(timestamp)
+      return format(date, 'HH:mm dd.MM.yy')
+    },
     async fetchTransactions(year, month) {
       try {
         this.transactions =
