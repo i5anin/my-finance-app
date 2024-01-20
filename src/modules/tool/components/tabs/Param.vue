@@ -3,8 +3,8 @@
     <v-row>
       <v-col cols="12">
         <div class="flex">
-          <h2 class="text-h5">Финансовые операции</h2>
-          <v-spacer />
+          <!--          <h2 class="text-h5">Финансовые операции</h2>-->
+          <!--          <v-spacer />-->
         </div>
 
         <v-table>
@@ -22,7 +22,7 @@
               v-for="(transaction, index) in transactions"
               :key="transaction.id"
             >
-              <td>{{ index + 1 }}</td>
+              <td :style="{ color: 'gray' }">{{ index + 1 }}</td>
               <td :style="{ color: transaction.amount >= 0 ? 'green' : 'red' }">
                 {{ transaction.amount }}
               </td>
