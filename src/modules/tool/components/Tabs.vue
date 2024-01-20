@@ -31,11 +31,8 @@
             >
               <component
                 :is="month.component"
+                :parentId="parentId"
                 :type="month.type"
-                :selectedYear="parseInt(yearTab, 10)"
-                :selectedMonth="
-                  monthsYears.findIndex((month) => month.name === monthTab) + 1
-                "
               />
             </v-window-item>
           </v-window>
@@ -84,45 +81,39 @@ export default {
     }
   },
   watch: {
-    yearTab(newYear) {
-      this.monthTab = this.monthsYears[0].name
-      this.updateHash()
-    },
-    monthTab(newMonth) {
-      if (newMonth) {
-        let monthIndex =
-          this.monthsYears.findIndex((el) => el.name === newMonth) + 1
-        this.updateHash()
-        this.$emit('updateTransactions', parseInt(this.yearTab, 10), monthIndex)
+    yearTab(newYear, oldYear) {
+      if (newYear !== oldYear) {
+        this.monthTab = this.monthsYears[0].name // Set to the first month when year changes
+        let monthIndex = 1 // Default to the first month
+        window.location.hash = `#${newYear}.${monthIndex}` // Update URL hash
+        this.fetchTransactions(newYear, this.monthsYears[0].name)
       }
     },
-  },
-  methods: {
-    updateHash() {
+    monthTab(newMonth) {
       let monthIndex =
-        this.monthsYears.findIndex((el) => el.name === this.monthTab) + 1
+        this.monthsYears.findIndex((el) => el.name == newMonth) + 1
       window.location.hash = `#${this.yearTab}.${monthIndex}`
-    },
-
-    fetchTransactions(year, month) {
-      console.log('-updateHash')
-      // this.$emit('updateTransactions', year, month)
+      this.fetchTransactions(this.yearTab, newMonth)
     },
   },
 
   mounted() {
-    this.fetchTransactions(this.selectedYear, this.selectedMonth)
+    const hash = window.location.hash.split('.')
+    const yearFromHash = hash[0].substring(1)
+    const monthFromHash = hash[1]
+      ? this.monthsYears[parseInt(hash[1]) - 1].name
+      : null
 
-    // Отслеживание изменений для selectedYear и selectedMonth
-    this.$watch(
-      () => [this.selectedYear, this.selectedMonth],
-      ([newYear, newMonth]) => {
-        if (typeof newYear === 'number' && typeof newMonth === 'number') {
-          console.log('- this.$watch(')
-          this.fetchTransactions(newYear, newMonth)
-        }
-      }
+    let currentYearTab = this.tabsYears.find(
+      (el) => el.url === `#${yearFromHash}`
     )
+    if (currentYearTab) this.yearTab = currentYearTab.name
+
+    if (monthFromHash) {
+      this.monthTab = monthFromHash
+    } else if (currentYearTab) {
+      this.monthTab = this.monthsYears[0].name // Set to the first month if only year is in the hash
+    }
   },
 }
 </script>
