@@ -66,7 +66,7 @@
 <script>
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FillingTable from '@/modules/editor-tool/components/Table.vue'
-import { toolTreeApi } from '@/modules/tool/api/tree'
+import { toolTreeApi } from '@/modules/tool/api/transactions'
 import { normSpaces } from '@/modules/tool/components/normSpaces'
 import CatalogBreadcrumbs from '@/modules/tool/components/CatalogBreadcrumbs.vue'
 
