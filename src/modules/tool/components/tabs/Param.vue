@@ -53,12 +53,10 @@ export default {
       return format(date, 'HH:mm dd.MM.yy')
     },
     async fetchTransactions(year, month) {
-      try {
-        this.transactions =
-          await transactionsApi.getTransactionsForMonthAndYear(year, month)
-      } catch (error) {
-        console.error('Error fetching transactions:', error)
-      }
+      this.transactions = transactionsApi.getTransactionsForMonthAndYear(
+        year,
+        month
+      )
     },
   },
   mounted() {

@@ -81,16 +81,39 @@ export default {
     }
   },
   watch: {
-    yearTab() {
-      let current_tab = this.tabsYears.find((el) => el.name == this.yearTab)
-      window.location.hash = current_tab.url
+    yearTab(newYear, oldYear) {
+      if (newYear !== oldYear) {
+        this.monthTab = this.monthsYears[0].name // Set to the first month when year changes
+        let monthIndex = 1 // Default to the first month
+        window.location.hash = `#${newYear}.${monthIndex}` // Update URL hash
+        this.fetchTransactions(newYear, this.monthsYears[0].name)
+      }
+    },
+    monthTab(newMonth) {
+      let monthIndex =
+        this.monthsYears.findIndex((el) => el.name == newMonth) + 1
+      window.location.hash = `#${this.yearTab}.${monthIndex}`
+      this.fetchTransactions(this.yearTab, newMonth)
     },
   },
+
   mounted() {
-    let current_tab = this.tabsYears.find(
-      (el) => el.url == window.location.hash
+    const hash = window.location.hash.split('.')
+    const yearFromHash = hash[0].substring(1)
+    const monthFromHash = hash[1]
+      ? this.monthsYears[parseInt(hash[1]) - 1].name
+      : null
+
+    let currentYearTab = this.tabsYears.find(
+      (el) => el.url === `#${yearFromHash}`
     )
-    if (current_tab !== undefined) this.yearTab = current_tab.name
+    if (currentYearTab) this.yearTab = currentYearTab.name
+
+    if (monthFromHash) {
+      this.monthTab = monthFromHash
+    } else if (currentYearTab) {
+      this.monthTab = this.monthsYears[0].name // Set to the first month if only year is in the hash
+    }
   },
 }
 </script>
