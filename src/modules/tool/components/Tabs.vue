@@ -69,10 +69,11 @@ export default {
     ]
 
     return {
-      yearTab: currentYear.toString(),
+      defaultMonth: 1,
+      yearTab: currentYear,
       monthTab: months[currentMonth - 1],
       tabsYears: years.map((year) => ({
-        name: year.toString(),
+        name: year,
         url: `#${year}`,
         component: ToolTabParam,
       })),
@@ -84,17 +85,23 @@ export default {
     }
   },
   watch: {
-    yearTab(newYear) {
-      // Установка monthTab на 'Январь' при выборе нового года
-      this.monthTab = this.monthsYears[0].name
-      console.log('Выбран год:', newYear, 'Установлен месяц: Январь')
-      this.updateHash()
-      this.emitUpdateTransactions()
+    yearTab(newYear, oldYear) {
+      if (newYear !== oldYear) {
+        this.monthTab = this.monthsYears[0].name // Устанавливаем месяц на Январь
+        console.log(
+          'год изменен:',
+          newYear,
+          'месяц установлен на:',
+          this.monthTab
+        )
+        this.emitUpdateTransactions()
+      }
     },
-    monthTab(newMonth) {
-      console.log('Выбран месяц:', newMonth, 'в году:', this.yearTab)
-      this.updateHash()
-      this.emitUpdateTransactions()
+    monthTab(newMonth, oldMonth) {
+      if (newMonth !== oldMonth) {
+        console.log('месяц изменен:', newMonth, 'в году:', this.yearTab)
+        this.emitUpdateTransactions()
+      }
     },
   },
   methods: {
@@ -104,9 +111,10 @@ export default {
       window.location.hash = `#${this.yearTab}.${monthIndex}`
     },
     emitUpdateTransactions() {
+      let year = parseInt(this.yearTab, 10)
       let monthIndex =
         this.monthsYears.findIndex((el) => el.name === this.monthTab) + 1
-      this.$emit('updateTransactions', parseInt(this.yearTab, 10), monthIndex)
+      this.$emit('updateTransactions', year, monthIndex)
     },
 
     fetchTransactions(year, month) {

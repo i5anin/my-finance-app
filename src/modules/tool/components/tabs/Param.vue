@@ -82,14 +82,14 @@ export default {
   watch: {
     selectedYear(newYear, oldYear) {
       if (newYear !== oldYear) {
-        // console.log('selectedYear')
-        // this.fetchTransactions(newYear, this.selectedMonth)
+        console.log('Param.vue год:', newYear, 'месяц:', this.selectedMonth)
+        this.fetchTransactions(newYear, this.selectedMonth)
       }
     },
     selectedMonth(newMonth, oldMonth) {
       if (newMonth !== oldMonth) {
-        // console.log('fetchTransactions')
-        // this.fetchTransactions(this.selectedYear, newMonth)
+        console.log('Param.vue год:', this.selectedYear, 'месяц:', newMonth)
+        this.fetchTransactions(this.selectedYear, newMonth)
       }
     },
   },
@@ -98,9 +98,9 @@ export default {
       // console.log('this.fetchTransactions()')
       // this.fetchTransactions()
     }
-    const currentYear = new Date().getFullYear()
-    const currentMonth = new Date().getMonth() + 1
-    console.log(currentYear, currentMonth)
+    // const currentYear = new Date().getFullYear()
+    // const currentMonth = new Date().getMonth() + 1
+    // console.log(currentYear, currentMonth)
     // console.log('mounted') тут нужно вставлять данные
     // this.fetchTransactions(currentYear, currentMonth)
   },
