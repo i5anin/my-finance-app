@@ -28,9 +28,9 @@ async function getTransactionsForCurrentMonth(req, res) {
 
     const { rows } = await pool.query(
       `SELECT *
-       FROM transactions
-       WHERE transaction_time >= $1
-         AND transaction_time <= $2`,
+       FROM dbo.transactions
+       WHERE timestamp >= $1
+         AND timestamp <= $2`,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
@@ -41,6 +41,19 @@ async function getTransactionsForCurrentMonth(req, res) {
   }
 }
 
+async function getAllTransactions(req, res) {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM dbo.transactions`)
+    res.json(rows)
+  } catch (error) {
+    console.error('Error while fetching all transactions:', error)
+    res.status(500).send(error.message)
+  }
+}
+
+// добавьте соответствующий маршрут
+
 module.exports = {
   getTransactionsForCurrentMonth,
+  getAllTransactions,
 }
