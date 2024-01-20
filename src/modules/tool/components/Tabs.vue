@@ -1,48 +1,96 @@
 <template>
   <v-card>
-    <v-tabs v-model="tab">
-      <v-tab v-for="item in tabs" :key="item.name" :value="item.name">
-        {{ item.name }}
+    <v-tabs v-model="yearTab">
+      <v-tab v-for="year in tabsYears" :key="year.name" :value="year.name">
+        {{ year.name }}
       </v-tab>
     </v-tabs>
 
     <v-card-text>
-      <v-window v-model="tab">
-        <v-window-item v-for="item in tabs" :key="item.name" :value="item.name">
-          <component
-            :is="item.component"
-            :parentId="parentId"
-            :type="item.type"
-          />
+      <v-window v-model="yearTab">
+        <v-window-item
+          v-for="year in tabsYears"
+          :key="year.name"
+          :value="year.name"
+        >
+          <v-tabs v-model="monthTab">
+            <v-tab
+              v-for="month in monthsYears"
+              :key="month.name"
+              :value="month.name"
+            >
+              {{ month.name }}
+            </v-tab>
+          </v-tabs>
+
+          <v-window v-model="monthTab">
+            <v-window-item
+              v-for="month in monthsYears"
+              :key="month.name"
+              :value="month.name"
+            >
+              <component
+                :is="month.component"
+                :parentId="parentId"
+                :type="month.type"
+              />
+            </v-window-item>
+          </v-window>
         </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script>
 import ToolTabParam from '@/modules/tool/components/tabs/Param.vue'
-import GiveTool from '@/modules/history-tool/components/Table.vue'
-import ToolTabTree from '@/modules/tool/components/tabs/Tree.vue'
 
-import EditorCatalog from '@/modules/editor-tool/components/Catalog.vue'
-import StorageCatalog from '@/modules/storage-tool/components/Catalog.vue'
-import TabIssueCatalog from '@/modules/issue-tool/components/Catalog.vue'
+export default {
+  data() {
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth() + 1
+    const years = Array.from({ length: 6 }, (_, i) => currentYear - i)
+    const months = [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ]
 
-import Report from '@/modules/tool/components/tabs/Report.vue'
-
-// Ссылка на текущую выбранную вкладку
-const tab = ref('Каталог')
-
-// Определение вкладок
-const tabs = [
-  { name: 'Редактор', component: EditorCatalog },
-  { name: 'Дерево', component: ToolTabTree },
-  { name: 'Параметры', component: ToolTabParam },
-  { name: 'Выдача', component: TabIssueCatalog },
-  { name: 'Склад', component: StorageCatalog },
-  { name: 'История', component: GiveTool },
-  { name: 'Отчёты', component: Report },
-]
+    return {
+      yearTab: currentYear.toString(),
+      monthTab: months[currentMonth - 1],
+      tabsYears: years.map((year) => ({
+        name: year.toString(),
+        url: `#${year}`,
+        component: ToolTabParam,
+      })),
+      monthsYears: months.map((month, index) => ({
+        name: month,
+        url: `#${index + 1}`,
+        component: ToolTabParam,
+      })),
+    }
+  },
+  watch: {
+    yearTab() {
+      let current_tab = this.tabsYears.find((el) => el.name == this.yearTab)
+      window.location.hash = current_tab.url
+    },
+  },
+  mounted() {
+    let current_tab = this.tabsYears.find(
+      (el) => el.url == window.location.hash
+    )
+    if (current_tab !== undefined) this.yearTab = current_tab.name
+  },
+}
 </script>

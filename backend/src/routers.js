@@ -4,14 +4,16 @@ const router = express.Router()
 const loginController = require('./controllers/b_login')
 
 const {
-  getTransactionsForCurrentMonth,
+  getTransactionsForMonthAndYear,
   getAllTransactions,
-  fillTransactionsWithRandomData,
 } = require('./controllers/b_transactions')
+
+const { fillTransactionsWithRandomData } = require('./controllers/b_faker')
 
 // Маршруты для аутентификации
 router.get('/database-info', loginController.getDatabaseInfo)
-router.get('/transactions/current-month', getTransactionsForCurrentMonth)
+
+router.get('/transactions/:year/:month', getTransactionsForMonthAndYear)
 router.get('/transactions/all', getAllTransactions)
 router.get('/faker', fillTransactionsWithRandomData)
 
