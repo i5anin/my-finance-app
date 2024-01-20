@@ -23,7 +23,9 @@
               :key="transaction.id"
             >
               <td>{{ index + 1 }}</td>
-              <td>{{ transaction.amount }}</td>
+              <td :style="{ color: transaction.amount >= 0 ? 'green' : 'red' }">
+                {{ transaction.amount }}
+              </td>
               <td>{{ transaction.comment }}</td>
               <td>{{ transaction.category }}</td>
               <td>{{ transaction.timestamp }}</td>
