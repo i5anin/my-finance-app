@@ -1,44 +1,38 @@
 <template>
   <v-card>
-    <v-tabs v-model="yearTab">
-      <v-tab v-for="year in tabsYears" :key="year.name" :value="year.name">
-        {{ year.name }}
-      </v-tab>
-    </v-tabs>
+    <v-select
+      v-model="yearTab"
+      :items="tabsYears"
+      item-text="value"
+      item-value="value"
+      label="Выберите год"
+    />
 
     <v-card-text>
-      <v-window v-model="yearTab">
-        <v-window-item
-          v-for="year in tabsYears"
-          :key="year.name"
-          :value="year.name"
+      <v-tabs v-model="monthTab">
+        <v-tab
+          v-for="month in monthsYears"
+          :key="month.name"
+          :value="month.name"
         >
-          <v-tabs v-model="monthTab">
-            <v-tab
-              v-for="month in monthsYears"
-              :key="month.name"
-              :value="month.name"
-            >
-              {{ month.name }}
-            </v-tab>
-          </v-tabs>
+          {{ month.name }}
+        </v-tab>
+      </v-tabs>
 
-          <v-window v-model="monthTab">
-            <v-window-item
-              v-for="month in monthsYears"
-              :key="month.name"
-              :value="month.name"
-            >
-              <component
-                :is="month.component"
-                :type="month.type"
-                :selectedYear="parseInt(yearTab, 10)"
-                :selectedMonth="
-                  monthsYears.findIndex((month) => month.name === monthTab) + 1
-                "
-              />
-            </v-window-item>
-          </v-window>
+      <v-window v-model="monthTab">
+        <v-window-item
+          v-for="month in monthsYears"
+          :key="month.name"
+          :value="month.name"
+        >
+          <component
+            :is="month.component"
+            :type="month.type"
+            :selectedYear="parseInt(yearTab, 10)"
+            :selectedMonth="
+              monthsYears.findIndex((month) => month.name === monthTab) + 1
+            "
+          />
         </v-window-item>
       </v-window>
     </v-card-text>
