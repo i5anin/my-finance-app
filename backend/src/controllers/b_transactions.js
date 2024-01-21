@@ -17,6 +17,8 @@ async function getTransactionsForMonthAndYear(req, res) {
     const year = req.params.year
     const month = req.params.month
 
+    console.log(year, month)
+
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
 

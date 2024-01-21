@@ -13,7 +13,7 @@ const { fillTransactionsWithRandomData } = require('./controllers/b_faker')
 // Маршруты для аутентификации
 router.get('/database-info', loginController.getDatabaseInfo)
 
-router.get('/transactions/:year/:month', getTransactionsForMonthAndYear)
+router.get('/transactions/:year-:month', getTransactionsForMonthAndYear)
 router.get('/transactions/all', getAllTransactions)
 router.get('/faker', fillTransactionsWithRandomData)
 

@@ -8,7 +8,7 @@ function handleResponse(response) {
 export const transactionsApi = {
   getTransactionsForMonthAndYear: async (year, month) =>
     axiosInstance
-      .get(`/transactions/${year}/${month}`)
+      .get(`/transactions/${year}-${month}`)
       .then(handleResponse)
       .catch(handleApiError),
 }

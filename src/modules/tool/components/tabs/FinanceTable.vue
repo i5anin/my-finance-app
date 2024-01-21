@@ -2,11 +2,6 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <div class="flex">
-          <!--          <h2 class="text-h5">Финансовые операции</h2>-->
-          <!--          <v-spacer />-->
-        </div>
-
         <v-table>
           <thead>
             <tr>
@@ -38,6 +33,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { transactionsApi } from '../../api/transactions'
 import { format, parseISO } from 'date-fns'
 
@@ -61,48 +57,45 @@ export default {
     },
     async fetchTransactions(year, month) {
       try {
-        const transactions =
-          await transactionsApi.getTransactionsForMonthAndYear(year, month)
-        this.transactions = transactions
+        const response = await transactionsApi.getTransactionsForMonthAndYear(
+          year,
+          month
+        )
+        // Проверьте, нужно ли использовать response.data
+        this.transactions = response
       } catch (error) {
         console.error('Ошибка при загрузке транзакций:', error)
-        // Здесь можете обработать ошибку, например, показать сообщение пользователю
-      }
-    },
-    tryFetchTransactions() {
-      if (
-        typeof this.selectedYear === 'number' &&
-        typeof this.selectedMonth === 'number'
-      ) {
-        // console.log('fetchTransactions')
-        // this.fetchTransactions(this.selectedYear, this.selectedMonth)
       }
     },
   },
   watch: {
     selectedYear(newYear, oldYear) {
       if (newYear !== oldYear) {
-        console.log('Param.vue год:', newYear, 'месяц:', this.selectedMonth)
+        console.log(
+          'FinanceTable.vue год:',
+          newYear,
+          'месяц:',
+          this.selectedMonth
+        )
         this.fetchTransactions(newYear, this.selectedMonth)
       }
     },
     selectedMonth(newMonth, oldMonth) {
       if (newMonth !== oldMonth) {
-        console.log('Param.vue год:', this.selectedYear, 'месяц:', newMonth)
+        console.log(
+          'FinanceTable.vue год:',
+          this.selectedYear,
+          'месяц:',
+          newMonth
+        )
         this.fetchTransactions(this.selectedYear, newMonth)
       }
     },
   },
   mounted() {
     if (this.selectedYear && this.selectedMonth) {
-      // console.log('this.fetchTransactions()')
-      // this.fetchTransactions()
+      this.fetchTransactions(this.selectedYear, this.selectedMonth)
     }
-    // const currentYear = new Date().getFullYear()
-    // const currentMonth = new Date().getMonth() + 1
-    // console.log(currentYear, currentMonth)
-    // console.log('mounted') тут нужно вставлять данные
-    // this.fetchTransactions(currentYear, currentMonth)
   },
 }
 </script>

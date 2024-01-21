@@ -3,9 +3,10 @@
     <v-select
       v-model="yearTab"
       :items="tabsYears"
-      item-text="value"
-      item-value="value"
+      item-text="name"
+      item-value="name"
       label="Выберите год"
+      :key="tabsYears.length"
     />
 
     <v-card-text>
@@ -29,9 +30,7 @@
             :is="month.component"
             :type="month.type"
             :selectedYear="parseInt(yearTab, 10)"
-            :selectedMonth="
-              monthsYears.findIndex((month) => month.name === monthTab) + 1
-            "
+            :selectedMonth="getSelectedMonthIndex(monthTab)"
           />
         </v-window-item>
       </v-window>
@@ -40,13 +39,13 @@
 </template>
 
 <script>
-import ToolTabParam from '@/modules/tool/components/tabs/Param.vue'
+import FinanceTable from '@/modules/tool/components/tabs/FinanceTable.vue'
 
 export default {
   data() {
     const currentYear = new Date().getFullYear()
     const currentMonth = new Date().getMonth() + 1
-    const years = Array.from({ length: 6 }, (_, i) => currentYear - i)
+    const tabsYears = ['2024', '2023', '2022', '2021', '2020']
     const months = [
       'Январь',
       'Февраль',
@@ -63,73 +62,55 @@ export default {
     ]
 
     return {
-      defaultMonth: 1,
-      yearTab: currentYear,
+      yearTab: currentYear.toString(),
       monthTab: months[currentMonth - 1],
-      tabsYears: years.map((year) => ({
-        name: year,
-        url: `#${year}`,
-        component: ToolTabParam,
-      })),
+      tabsYears,
       monthsYears: months.map((month, index) => ({
         name: month,
-        url: `#${index + 1}`,
-        component: ToolTabParam,
+        component: FinanceTable,
       })),
     }
   },
-  watch: {
-    yearTab(newYear, oldYear) {
-      if (newYear !== oldYear) {
-        this.monthTab = this.monthsYears[0].name // Устанавливаем месяц на Январь
-        console.log(
-          'год изменен:',
-          newYear,
-          'месяц установлен на:',
-          this.monthTab
-        )
-        this.emitUpdateTransactions()
-      }
-    },
-    monthTab(newMonth, oldMonth) {
-      if (newMonth !== oldMonth) {
-        console.log('месяц изменен:', newMonth, 'в году:', this.yearTab)
-        this.emitUpdateTransactions()
-      }
-    },
-  },
   methods: {
     updateHash() {
-      let monthIndex =
-        this.monthsYears.findIndex((el) => el.name === this.monthTab) + 1
+      const monthIndex = this.getSelectedMonthIndex(this.monthTab)
       window.location.hash = `#${this.yearTab}.${monthIndex}`
     },
     emitUpdateTransactions() {
-      let year = parseInt(this.yearTab, 10)
-      let monthIndex =
-        this.monthsYears.findIndex((el) => el.name === this.monthTab) + 1
+      const year = parseInt(this.yearTab, 10)
+      const monthIndex = this.getSelectedMonthIndex(this.monthTab)
       this.$emit('updateTransactions', year, monthIndex)
     },
-
-    fetchTransactions(year, month) {
-      console.log('-updateHash')
-      this.$emit('updateTransactions', year, month)
+    fetchTransactions() {
+      this.emitUpdateTransactions()
+    },
+    handleHashChangeOnLoad() {
+      const hash = window.location.hash.slice(1)
+      const [year, month] = hash.split('.')
+      if (year && month) {
+        this.yearTab = year
+        this.monthTab = this.monthsYears[parseInt(month, 10) - 1].name
+      }
+      this.updateHash()
+    },
+    getSelectedMonthIndex(monthName) {
+      return this.monthsYears.findIndex((month) => month.name === monthName) + 1
     },
   },
-
+  watch: {
+    yearTab() {
+      this.monthTab = this.monthsYears[0].name
+      this.updateHash()
+    },
+    monthTab() {
+      this.updateHash()
+    },
+  },
   mounted() {
-    this.fetchTransactions(this.selectedYear, this.selectedMonth)
-
-    // Отслеживание изменений для selectedYear и selectedMonth
-    this.$watch(
-      () => [this.selectedYear, this.selectedMonth],
-      ([newYear, newMonth]) => {
-        if (typeof newYear === 'number' && typeof newMonth === 'number') {
-          console.log('-updateHash')
-          this.fetchTransactions(newYear, newMonth)
-        }
-      }
-    )
+    this.handleHashChangeOnLoad()
+    // Дополнительно, убедитесь, что yearTab и monthTab являются строками
+    this.yearTab = this.yearTab.toString()
+    this.monthTab = this.monthTab.toString()
   },
 }
 </script>
