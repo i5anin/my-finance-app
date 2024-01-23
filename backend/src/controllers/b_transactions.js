@@ -48,12 +48,19 @@ async function getAvailableYearsAndMonths(req, res) {
     )
 
     const result = rows.reduce((acc, { year, month }) => {
-      if (!acc[year]) {
-        acc[year] = []
+      // Находим индекс объекта с текущим годом в аккумуляторе
+      const yearIndex = acc.findIndex((item) => item.yeart === year)
+
+      // Если год уже есть в аккумуляторе, добавляем месяц к существующему объекту
+      if (yearIndex > -1) {
+        acc[yearIndex].mounth.push(month)
+      } else {
+        // Если года нет, создаем новый объект с годом и месяцем
+        acc.push({ yeart: year, mounth: [month] })
       }
-      acc[year].push(month)
+
       return acc
-    }, {})
+    }, [])
 
     res.json(result)
   } catch (error) {
