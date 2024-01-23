@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <!--    <ChartFinance />-->
     <v-row>
       <v-col cols="12">
         <v-table>
@@ -36,11 +37,12 @@
 </template>
 
 <script>
-import { markRaw } from 'vue'
+import ChartFinance from '../../Сhart.vue'
 import { transactionsApi } from '../../api/transactions'
 import { format, parseISO } from 'date-fns'
 
 export default {
+  components: { ChartFinance },
   data() {
     return {
       transactions: [],

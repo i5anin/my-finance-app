@@ -3,8 +3,6 @@
     <v-select
       v-model="yearTab"
       :items="tabsYears"
-      item-text="name"
-      item-value="name"
       label="Выберите год"
       :key="tabsYears.length"
     />
@@ -54,15 +52,24 @@ export default {
   methods: {
     async initializeData() {
       try {
-        const availableData = await transactionsApi.getAvailableYearsAndMonths()
-        this.tabsYears = Object.keys(availableData).reverse()
-        this.yearTab = this.tabsYears[0]
+        const availableDataArray =
+          await transactionsApi.getAvailableYearsAndMonths()
+        const availableData = availableDataArray.reduce((acc, item) => {
+          acc[item.yeart] = item.mounth.map((month) => parseInt(month, 10))
+          return acc
+        }, {})
+
+        this.tabsYears = Object.keys(availableData)
+          .map((year) => ({ name: year }))
+          .sort((a, b) => b.name - a.name)
+        this.yearTab = this.tabsYears[0].name
 
         this.updateMonthsForYear(this.yearTab, availableData)
       } catch (error) {
         console.error('Ошибка при получении доступных годов и месяцев:', error)
       }
     },
+
     updateMonthsForYear(year, availableData) {
       const months = availableData[year].map((monthIndex) => ({
         name: this.monthName(monthIndex),
@@ -71,7 +78,9 @@ export default {
 
       this.monthsYears = months
       this.monthTab = months[0]?.name
+      this.emitUpdateTransactions() // Вызывайте это здесь, чтобы обновить таблицу при изменении года
     },
+
     monthName(index) {
       const months = [
         'Январь',
@@ -87,19 +96,24 @@ export default {
         'Ноябрь',
         'Декабрь',
       ]
-      return months[parseInt(index, 10) - 1]
+      return months[index - 1]
     },
+
+    getSelectedMonthIndex(monthName) {
+      return this.monthsYears.findIndex((month) => month.name === monthName) + 1
+    },
+
     updateHash() {
-      const monthIndex =
-        this.monthsYears.findIndex((month) => month.name === this.monthTab) + 1
+      const monthIndex = this.getSelectedMonthIndex(this.monthTab)
       window.location.hash = `#${this.yearTab}.${monthIndex}`
     },
+
     emitUpdateTransactions() {
       const year = parseInt(this.yearTab, 10)
-      const monthIndex =
-        this.monthsYears.findIndex((month) => month.name === this.monthTab) + 1
+      const monthIndex = this.getSelectedMonthIndex(this.monthTab)
       this.$emit('updateTransactions', year, monthIndex)
     },
+
     handleHashChangeOnLoad() {
       const hash = window.location.hash.slice(1)
       const [year, month] = hash.split('.')
@@ -110,20 +124,21 @@ export default {
       this.updateHash()
     },
   },
+
   watch: {
-    async yearTab(newYear, oldYear) {
+    yearTab(newYear, oldYear) {
       if (newYear !== oldYear) {
-        const availableData = await transactionsApi.getAvailableYearsAndMonths()
-        this.updateMonthsForYear(newYear, availableData)
-        this.updateHash()
+        this.initializeData()
       }
     },
+
     monthTab(newMonth, oldMonth) {
       if (newMonth !== oldMonth) {
-        this.updateHash()
+        this.emitUpdateTransactions() // Вызывайте это, чтобы обновить таблицу при изменении месяца
       }
     },
   },
+
   mounted() {
     this.initializeData()
     this.handleHashChangeOnLoad()
