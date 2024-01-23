@@ -26,7 +26,8 @@ async function getTransactionsForMonthAndYear(req, res) {
       `SELECT *
        FROM dbo.transactions
        WHERE timestamp >= $1
-         AND timestamp <= $2`,
+         AND timestamp <= $2
+       ORDER BY timestamp DESC`,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
