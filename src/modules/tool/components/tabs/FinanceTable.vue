@@ -23,7 +23,10 @@
               </td>
               <td>{{ transaction.comment }}</td>
               <td>{{ transaction.category }}</td>
-              <td>{{ formatDate(transaction.timestamp) }}</td>
+              <!-- Обратите внимание на изменения в следующей строке -->
+              <td :style="{ color: 'gray' }">
+                {{ formatDate(transaction.timestamp) }}
+              </td>
             </tr>
           </tbody>
         </v-table>
@@ -49,11 +52,9 @@ export default {
   },
   methods: {
     formatDate(timestamp) {
-      if (!timestamp || !Date.parse(timestamp)) {
-        return 'Неверная дата'
-      }
+      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
       const date = parseISO(timestamp)
-      return format(date, 'HH:mm dd.MM.yy')
+      return format(date, 'dd.MM.yyyy')
     },
     async fetchTransactions(year, month) {
       try {
