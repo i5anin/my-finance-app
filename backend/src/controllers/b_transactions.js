@@ -74,10 +74,42 @@ async function getAllTransactions(req, res) {
   }
 }
 
+async function getChartForMonthAndYear(req, res) {
+  try {
+    const year = req.params.year
+    const month = req.params.month
+
+    console.log(year, month)
+
+    const firstDayOfMonth = new Date(year, month - 1, 1)
+    const lastDayOfMonth = new Date(year, month, 0)
+
+    const { rows } = await pool.query(
+      `SELECT EXTRACT(DAY FROM timestamp) as day, SUM(amount) as total
+       FROM dbo.transactions
+       WHERE timestamp >= $1
+         AND timestamp <= $2
+       GROUP BY EXTRACT(DAY FROM timestamp)
+       ORDER BY day`,
+      [firstDayOfMonth, lastDayOfMonth]
+    )
+
+    const chartData = rows.map((row) => ({
+      name: row.day.toString(),
+      pl: row.total,
+    }))
+
+    res.json(chartData)
+  } catch (error) {
+    console.error('Error while fetching transactions:', error)
+    res.status(500).send(error.message)
+  }
+}
 // добавьте соответствующий маршрут
 
 module.exports = {
   getTransactionsForMonthAndYear,
   getAllTransactions,
   getAvailableYearsAndMonths,
+  getChartForMonthAndYear,
 }

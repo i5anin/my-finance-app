@@ -66,7 +66,7 @@ export const plotsMenuItems = [
     items: [
       { title: 'Ремонт оборудования' },
       { title: 'Закупка инструмента' },
-      { title: 'Инструмент', path: '/Tool' },
+      { title: 'Финансы', path: '/Finance' },
     ],
   },
   { title: 'Участок заготовки', icon: 'mdi-cog', path: '/machining_area' },

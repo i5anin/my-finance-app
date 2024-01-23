@@ -9,14 +9,15 @@
       :rail="isRail"
     >
       <v-list>
-        <v-list-item prepend-avatar="@/assets/logoWhite.svg" title="СОФТ 2.0" />
+        <!--        <v-list-item prepend-avatar="@/assets/logoWhite.svg" title="БЮДЖЕТ" />-->
+        <v-list-item title="БЮДЖЕТ" />
       </v-list>
       <v-divider />
       <v-list>
         <v-list-item
           prepend-avatar="@/assets/avatar.png"
-          title="Пользователь"
-          subtitle="Тестирование"
+          title="Isanin Sergey"
+          subtitle="Admin"
         />
         <!-- title='Исанин Сергей' subtitle='Администратор'-->
       </v-list>
@@ -37,14 +38,14 @@
       />
     </v-navigation-drawer>
 
-    <v-app-bar color="primary" sticky prominent dark>
+    <v-app-bar color="indigo" sticky prominent dark>
       <!-- Левая кнопка -->
       <v-app-bar-nav-icon
         variant="text"
         @click.stop="isRail = !isRail"
       ></v-app-bar-nav-icon>
       <!-- Название -->
-      <v-toolbar-title>PF-FORUM</v-toolbar-title>
+      <v-toolbar-title>ФИНАНСЫ</v-toolbar-title>
       <v-spacer />
       <!-- Три кнопки справа -->
       <v-btn icon>

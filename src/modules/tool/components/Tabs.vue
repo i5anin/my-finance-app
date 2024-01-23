@@ -19,7 +19,7 @@
           {{ month.name }}
         </v-tab>
       </v-tabs>
-
+      <Chart></Chart>
       <v-window v-model="monthTab">
         <v-window-item
           v-for="month in monthsYears"
@@ -40,8 +40,10 @@
 
 <script>
 import FinanceTable from '@/modules/tool/components/tabs/FinanceTable.vue'
+import Chart from '@/modules/tool/components/Chart.vue'
 
 export default {
+  components: { Chart },
   data() {
     const currentYear = new Date().getFullYear()
     const currentMonth = new Date().getMonth() + 1

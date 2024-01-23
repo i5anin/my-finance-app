@@ -39,8 +39,8 @@ const routes = [
   // },
   // Маршрут без параметра parentId
   {
-    path: '/Tool',
-    name: 'Tool',
+    path: '/Finance',
+    name: 'Finance',
     component: Tool,
     // props: { parentId: 0 }, // Здесь мы устанавливаем parentId по умолчанию
   },

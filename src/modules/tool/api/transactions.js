@@ -12,6 +12,12 @@ export const transactionsApi = {
       .then(handleResponse)
       .catch(handleApiError),
 
+  getChartForMonthAndYear: async (year, month) =>
+    axiosInstance
+      .get(`/transactions/chart/${year}-${month}`)
+      .then(handleResponse)
+      .catch(handleApiError),
+
   getAvailableYearsAndMonths: async () =>
     axiosInstance
       .get('/years-months')
