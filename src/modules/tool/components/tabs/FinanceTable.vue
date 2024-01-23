@@ -53,7 +53,7 @@ export default {
         return 'Неверная дата'
       }
       const date = parseISO(timestamp)
-      return format(date, 'dd.MM.yyyy HH:mm')
+      return format(date, 'HH:mm dd.MM.yy')
     },
     async fetchTransactions(year, month) {
       try {
