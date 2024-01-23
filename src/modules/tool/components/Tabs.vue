@@ -3,8 +3,8 @@
     <v-select
       v-model="yearTab"
       :items="tabsYears"
-      item-text="name"
-      item-value="name"
+      item-text="year"
+      item-value="year"
       label="Выберите год"
       :key="tabsYears.length"
     />
@@ -52,26 +52,53 @@ export default {
     }
   },
   methods: {
+    getSelectedMonthIndex(monthName) {
+      return this.monthsYears.findIndex((month) => month.name === monthName) + 1
+    },
     async initializeData() {
       try {
         const availableData = await transactionsApi.getAvailableYearsAndMonths()
-        this.tabsYears = Object.keys(availableData).reverse()
-        this.yearTab = this.tabsYears[0]
+        console.log('Исходные данные:', availableData)
+
+        this.tabsYears = availableData.map((item) => ({
+          name: item.yeart,
+          value: parseInt(item.yeart),
+        }))
+        console.log('Обработанные годы:', this.tabsYears)
+
+        this.yearTab = this.tabsYears[0].value
+        console.log('Выбранный год:', this.yearTab)
 
         this.updateMonthsForYear(this.yearTab, availableData)
       } catch (error) {
         console.error('Ошибка при получении доступных годов и месяцев:', error)
       }
     },
-    updateMonthsForYear(year, availableData) {
-      const months = availableData[year].map((monthIndex) => ({
-        name: this.monthName(monthIndex),
+    updateMonthsForYear(selectedYear, availableData) {
+      const yearData = availableData.find(
+        (item) => parseInt(item.yeart, 10) === selectedYear
+      )
+      if (!yearData) {
+        console.error(`Данные для года ${selectedYear} не найдены.`)
+        return
+      }
+      console.log('Данные для выбранного года:', yearData)
+
+      const sortedMonths = yearData.mounth
+        .map((monthIndex) => parseInt(monthIndex, 10))
+        .sort((a, b) => a - b)
+      console.log('Отсортированные месяцы:', sortedMonths)
+
+      const months = sortedMonths.map((monthIndex) => ({
+        name: this.monthName(monthIndex.toString()),
         component: FinanceTable,
       }))
+      console.log('Объекты месяцев:', months)
 
       this.monthsYears = months
-      this.monthTab = months[0]?.name
+      this.monthTab = months.length > 0 ? months[0].name : ''
     },
+
     monthName(index) {
       const months = [
         'Январь',
@@ -113,9 +140,14 @@ export default {
   watch: {
     async yearTab(newYear, oldYear) {
       if (newYear !== oldYear) {
-        const availableData = await transactionsApi.getAvailableYearsAndMonths()
-        this.updateMonthsForYear(newYear, availableData)
-        this.updateHash()
+        try {
+          const availableData =
+            await transactionsApi.getAvailableYearsAndMonths()
+          this.updateMonthsForYear(newYear, availableData)
+          this.updateHash()
+        } catch (error) {
+          console.error('Ошибка при обновлении данных года:', error)
+        }
       }
     },
     monthTab(newMonth, oldMonth) {
