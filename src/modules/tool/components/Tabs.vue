@@ -40,93 +40,77 @@
 
 <script>
 import FinanceTable from '@/modules/tool/components/tabs/FinanceTable.vue'
-import { transactionsApi } from '../api/transactions'
 
 export default {
   data() {
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth() + 1
+    const tabsYears = ['2024', '2023', '2022', '2021', '2020']
+    const months = [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ]
+
     return {
-      yearTab: '',
-      monthTab: '',
-      tabsYears: [],
-      monthsYears: [],
+      yearTab: currentYear.toString(),
+      monthTab: months[currentMonth - 1],
+      tabsYears,
+      monthsYears: months.map((month, index) => ({
+        name: month,
+        component: FinanceTable,
+      })),
     }
   },
   methods: {
-    async initializeData() {
-      try {
-        const availableData = await transactionsApi.getAvailableYearsAndMonths()
-        this.tabsYears = Object.keys(availableData).reverse()
-        this.yearTab = this.tabsYears[0]
-
-        this.updateMonthsForYear(this.yearTab, availableData)
-      } catch (error) {
-        console.error('Ошибка при получении доступных годов и месяцев:', error)
-      }
-    },
-    updateMonthsForYear(year, availableData) {
-      const months = availableData[year].map((monthIndex) => ({
-        name: this.monthName(monthIndex),
-        component: FinanceTable,
-      }))
-
-      this.monthsYears = months
-      this.monthTab = months[0]?.name
-    },
-    monthName(index) {
-      const months = [
-        'Январь',
-        'Февраль',
-        'Март',
-        'Апрель',
-        'Май',
-        'Июнь',
-        'Июль',
-        'Август',
-        'Сентябрь',
-        'Октябрь',
-        'Ноябрь',
-        'Декабрь',
-      ]
-      return months[parseInt(index, 10) - 1]
-    },
     updateHash() {
-      const monthIndex =
-        this.monthsYears.findIndex((month) => month.name === this.monthTab) + 1
+      const monthIndex = this.getSelectedMonthIndex(this.monthTab)
       window.location.hash = `#${this.yearTab}.${monthIndex}`
     },
     emitUpdateTransactions() {
       const year = parseInt(this.yearTab, 10)
-      const monthIndex =
-        this.monthsYears.findIndex((month) => month.name === this.monthTab) + 1
+      const monthIndex = this.getSelectedMonthIndex(this.monthTab)
       this.$emit('updateTransactions', year, monthIndex)
+    },
+    fetchTransactions() {
+      this.emitUpdateTransactions()
     },
     handleHashChangeOnLoad() {
       const hash = window.location.hash.slice(1)
       const [year, month] = hash.split('.')
       if (year && month) {
         this.yearTab = year
-        this.monthTab = this.monthsYears[parseInt(month, 10) - 1]?.name
+        this.monthTab = this.monthsYears[parseInt(month, 10) - 1].name
       }
       this.updateHash()
     },
+    getSelectedMonthIndex(monthName) {
+      return this.monthsYears.findIndex((month) => month.name === monthName) + 1
+    },
   },
   watch: {
-    async yearTab(newYear, oldYear) {
-      if (newYear !== oldYear) {
-        const availableData = await transactionsApi.getAvailableYearsAndMonths()
-        this.updateMonthsForYear(newYear, availableData)
-        this.updateHash()
-      }
+    yearTab() {
+      this.monthTab = this.monthsYears[0].name
+      this.updateHash()
     },
-    monthTab(newMonth, oldMonth) {
-      if (newMonth !== oldMonth) {
-        this.updateHash()
-      }
+    monthTab() {
+      this.updateHash()
     },
   },
   mounted() {
-    this.initializeData()
     this.handleHashChangeOnLoad()
+    // Дополнительно, убедитесь, что yearTab и monthTab являются строками
+    this.yearTab = this.yearTab.toString()
+    this.monthTab = this.monthTab.toString()
   },
 }
 </script>
