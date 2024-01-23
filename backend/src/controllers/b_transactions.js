@@ -38,6 +38,30 @@ async function getTransactionsForMonthAndYear(req, res) {
   }
 }
 
+async function getAvailableYearsAndMonths(req, res) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT EXTRACT(YEAR FROM timestamp) AS year, EXTRACT(MONTH FROM timestamp) AS month
+       FROM dbo.transactions
+       GROUP BY year, month
+       ORDER BY year DESC, month DESC`
+    )
+
+    const result = rows.reduce((acc, { year, month }) => {
+      if (!acc[year]) {
+        acc[year] = []
+      }
+      acc[year].push(month)
+      return acc
+    }, {})
+
+    res.json(result)
+  } catch (error) {
+    console.error('Error while fetching available years and months:', error)
+    res.status(500).send(error.message)
+  }
+}
+
 async function getAllTransactions(req, res) {
   try {
     const { rows } = await pool.query(
@@ -55,4 +79,5 @@ async function getAllTransactions(req, res) {
 module.exports = {
   getTransactionsForMonthAndYear,
   getAllTransactions,
+  getAvailableYearsAndMonths,
 }
