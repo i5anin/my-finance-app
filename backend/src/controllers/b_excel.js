@@ -16,25 +16,26 @@ async function createAndInsertTransactionsFromXLS() {
   try {
     // Определение и создание таблицы transactions
     await pool.query(`
-      DROP TABLE IF EXISTS dbo.transactions;
-      CREATE TABLE dbo.transactions (
-        transaction_id SERIAL PRIMARY KEY,
-        date_of_operation TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-        date_of_payment TIMESTAMP WITHOUT TIME ZONE,
-        card_number VARCHAR(255),
-        status VARCHAR(50),
-        operation_amount NUMERIC(10, 2) NOT NULL,
-        operation_currency VARCHAR(3) NOT NULL,
-        payment_amount NUMERIC(10, 2) NOT NULL,
-        payment_currency VARCHAR(3) NOT NULL,
-        cashback NUMERIC(10, 2),
-        category VARCHAR(255),
-        mcc VARCHAR(255),
-        description TEXT,
-        bonuses NUMERIC(10, 2),
-        rounding NUMERIC(10, 2),
-        total_amount_with_rounding NUMERIC(10, 2) NOT NULL
-      );
+        DROP TABLE IF EXISTS dbo.transactions;
+        CREATE TABLE dbo.transactions
+        (
+            transaction_id             SERIAL PRIMARY KEY,
+            date_of_operation          TIMESTAMP WITHOUT TIME ZONE, --Дата операции
+            date_of_payment            TIMESTAMP WITHOUT TIME ZONE, --Дата платежа
+            card_number                VARCHAR(255),                --Номер карты
+            status                     VARCHAR(50),                 --Статус
+            operation_amount           NUMERIC(15, 2),              --Сумма операции
+            operation_currency         VARCHAR(3),                  --Валюта операции
+            payment_amount             NUMERIC(15, 2),              --Сумма платежа
+            payment_currency           VARCHAR(3),                  --Валюта платежа
+            cashback                   NUMERIC(15, 2),              --Кэшбэк
+            category                   VARCHAR(255),                --Категория
+            mcc                        VARCHAR(255),                --MCC
+            description                TEXT,                        --Описание
+            bonuses                    NUMERIC(15, 2),              --Бонусы (включая кэшбэк)
+            rounding                   NUMERIC(15, 2),              --Округление на инвесткопилку
+            total_amount_with_rounding NUMERIC(15, 2)               --Сумма операции с округлением
+        );
     `)
     console.log('Table created successfully.')
 
@@ -46,8 +47,7 @@ async function createAndInsertTransactionsFromXLS() {
     // Вставка данных в таблицу transactions
     for (let i = 0; i < data.length; i++) {
       let row = data[i]
-      // Проверка и обработка пустых значений для столбцов NOT NULL
-      row = row.map((cell) => (cell !== null ? cell : '')) // Замените пустые ячейки на пустую строку или другое значение по умолчанию
+      row = row.map((cell) => (cell !== null ? cell : '')) // Обработка пустых значений
 
       const query = `INSERT INTO dbo.transactions (
         date_of_operation, date_of_payment, card_number, status, operation_amount,

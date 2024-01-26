@@ -10,22 +10,30 @@
               <th class="text-left">Комментарий</th>
               <th class="text-left">Категория</th>
               <th class="text-left">Время</th>
+              <th class="text-left">Дата</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="(transaction, index) in transactions"
-              :key="transaction.id"
+              :key="transaction.transaction_id"
             >
               <td :style="{ color: 'gray' }">{{ index + 1 }}</td>
-              <td :style="{ color: transaction.amount >= 0 ? 'green' : 'red' }">
-                {{ transaction.amount }}
+              <td
+                :style="{
+                  color: transaction.operation_amount >= 0 ? 'green' : 'red',
+                }"
+              >
+                {{ transaction.operation_amount }}
+                {{ transaction.operation_currency }}
               </td>
-              <td>{{ transaction.comment }}</td>
+              <td>{{ transaction.description }}</td>
               <td>{{ transaction.category }}</td>
-              <!-- Обратите внимание на изменения в следующей строке -->
+              <td>
+                {{ formatTime(transaction.date_of_operation) }}
+              </td>
               <td :style="{ color: 'gray' }">
-                {{ formatDate(transaction.timestamp) }}
+                {{ formatDate(transaction.date_of_operation) }}
               </td>
             </tr>
           </tbody>
@@ -56,6 +64,12 @@ export default {
       const date = parseISO(timestamp)
       return format(date, 'dd.MM.yyyy')
     },
+    formatTime(timestamp) {
+      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
+      const date = parseISO(timestamp)
+      return format(date, 'hh:mm')
+    },
+
     async fetchTransactions(year, month) {
       try {
         const response = await transactionsApi.getTransactionsForMonthAndYear(
