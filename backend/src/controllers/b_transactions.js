@@ -10,6 +10,29 @@ const dbConfig =
 
 // Создание пула соединений с базой данных
 const pool = new Pool(dbConfig)
+async function getIncomeAndExpensePerMonth(req, res) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT
+         DATE_TRUNC('month', date_of_operation) AS month,
+         SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END) AS total_income,
+         SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END) AS total_expense,
+         SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END) +
+         SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END) AS net_income
+       FROM
+         dbo.transactions
+       WHERE
+         status != 'FAILED'
+       GROUP BY month
+       ORDER BY month DESC`
+    )
+
+    res.json(rows)
+  } catch (error) {
+    console.error('Error while fetching income and expense per month:', error)
+    res.status(500).send(error.message)
+  }
+}
 
 // Функция для получения транзакций за текущий месяц
 async function getTransactionsForMonthAndYear(req, res) {
@@ -112,8 +135,9 @@ async function getChartForMonthAndYear(req, res) {
 // добавьте соответствующий маршрут
 
 module.exports = {
+  getIncomeAndExpensePerMonth,
   getTransactionsForMonthAndYear,
-  getAllTransactions,
   getAvailableYearsAndMonths,
   getChartForMonthAndYear,
+  getAllTransactions,
 }

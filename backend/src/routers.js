@@ -11,6 +11,7 @@ const { createAndInsertTransactionsFromXLS } = require('./controllers/b_excel')
 // Маршруты для аутентификации
 router.get('/database-info', loginController.getDatabaseInfo)
 
+router.get('/transactions/month', finance.getIncomeAndExpensePerMonth)
 router.get('/transactions/:year-:month', finance.getTransactionsForMonthAndYear)
 router.get('/transactions/chart/:year-:month', finance.getChartForMonthAndYear)
 router.get('/years-months', finance.getAvailableYearsAndMonths)
