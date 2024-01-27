@@ -172,14 +172,13 @@ export default {
     ...mapGetters('EditorToolStore', [
       'widthOptions',
       'shagOptions',
-      'gabaritOptions',
       'nameOptions',
       'tool',
     ]),
     ...mapState('EditorToolStore', ['idParent']),
-    currentFolderName() {
-      // return this.toolId === null ? this.idParent.label : this.tool.folder_name
-    },
+    // currentFolderName() {
+    //   // return this.toolId === null ? this.idParent.label : this.tool.folder_name
+    // },
     selectedParamsInfo() {
       return this.selectedParams
         .map((paramName) =>

@@ -1,13 +1,18 @@
 <template>
   <EditToolModal
-    :is-active="isModalActive"
+    v-if="openDialog"
+    :is-active="openDialog"
     :transaction="selectedTransaction"
     @close-modal="closeModal"
+    :persistent="true"
+    :tool-id="selectedTransaction ? selectedTransaction.transaction_id : null"
+    @canceled="onClosePopup"
+    @changes-saved="onSaveChanges"
   />
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-table>
+        <v-table hover="true">
           <thead>
             <tr>
               <th class="text-left">№</th>
@@ -59,6 +64,7 @@
 </template>
 
 <script>
+// data, props, computed, methods, etc.
 import { transactionsApi } from '../../tool/api/transactions'
 import { format, parseISO } from 'date-fns'
 import EditToolModal from './Modal.vue'
@@ -77,7 +83,7 @@ export default {
         Sun: 'ВС',
       },
       transactions: [],
-      isModalActive: false,
+      openDialog: false,
       selectedTransaction: null,
     }
   },
@@ -102,12 +108,18 @@ export default {
     },
   },
   methods: {
+    onClosePopup() {
+      this.openDialog = false
+    },
+    onCancel() {
+      this.$emit('canceled')
+    },
     closeModal() {
       this.isModalActive = false
     },
     onEditRow(transaction) {
       this.selectedTransaction = transaction
-      this.isModalActive = true
+      this.openDialog = true
     },
     dayOfWeekStyle(timestamp) {
       const dayOfWeek = this.formatDayWeek(timestamp)
@@ -187,7 +199,7 @@ export default {
     255,
     255,
     255,
-    0.1
+    0.03
   ); /* Или любой другой цвет, подходящий для темной темы */
 }
 </style>
