@@ -1,4 +1,4 @@
-import { toolEditorApi } from '@/modules/editor-tool/api/editor'
+import { toolEditorApi } from '@/modules/editor-finance/api/editor'
 import { toolApi } from '@/api'
 
 export default {

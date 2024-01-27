@@ -76,20 +76,12 @@
       <v-btn
         color="red darken-1"
         variant="text"
-        @click="confirmDelete"
-        class="text-none text-subtitle-1 ml-3"
-      >
-        Удалить
-      </v-btn>
-      <v-spacer />
-      <v-btn
-        color="red darken-1"
-        variant="text"
         @click="onCancel"
         class="text-none text-subtitle-1 ml-3"
       >
         Закрыть
       </v-btn>
+      <v-spacer />
       <v-btn
         prepend-icon="mdi-check-circle"
         @click="onSave"

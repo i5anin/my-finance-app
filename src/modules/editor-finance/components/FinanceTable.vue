@@ -1,4 +1,9 @@
 <template>
+  <EditToolModal
+    :is-active="isModalActive"
+    :transaction="selectedTransaction"
+    @close-modal="closeModal"
+  />
   <v-container>
     <v-row>
       <v-col cols="12">
@@ -21,6 +26,7 @@
               v-for="(transaction, index) in transactions"
               :key="transaction.transaction_id"
               :class="{ alternateBackground: shouldAlternateBackground(index) }"
+              @click="onEditRow(transaction)"
             >
               <td :style="{ color: 'gray' }">{{ index + 1 }}</td>
               <td :style="{ color: 'gray' }">
@@ -53,10 +59,12 @@
 </template>
 
 <script>
-import { transactionsApi } from '../../api/transactions'
+import { transactionsApi } from '../../tool/api/transactions'
 import { format, parseISO } from 'date-fns'
+import EditToolModal from './Modal.vue'
 
 export default {
+  components: { EditToolModal },
   data() {
     return {
       weekDays: {
@@ -69,6 +77,8 @@ export default {
         Sun: 'ВС',
       },
       transactions: [],
+      isModalActive: false,
+      selectedTransaction: null,
     }
   },
   props: {
@@ -92,6 +102,13 @@ export default {
     },
   },
   methods: {
+    closeModal() {
+      this.isModalActive = false
+    },
+    onEditRow(transaction) {
+      this.selectedTransaction = transaction
+      this.isModalActive = true
+    },
     dayOfWeekStyle(timestamp) {
       const dayOfWeek = this.formatDayWeek(timestamp)
       if (dayOfWeek === 'СБ' || dayOfWeek === 'ВС') {
