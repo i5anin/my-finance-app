@@ -1,180 +1,179 @@
 <template>
+  <EditToolModal
+    v-if="openDialog"
+    :is-active="openDialog"
+    :transaction="selectedTransaction"
+    @close-modal="closeModal"
+    :persistent="true"
+    :tool-id="selectedTransaction ? selectedTransaction.transaction_id : null"
+    @canceled="onClosePopup"
+    @changes-saved="onSaveChanges"
+  />
   <v-container>
-    <tool-filter :namespace="namespace">
-      <v-btn color="blue" @click="onAddTool">Новый инструмент</v-btn>
-    </tool-filter>
-    <edit-tool-modal
-      v-if="openDialog"
-      :persistent="true"
-      :tool-id="editingToolId"
-      @canceled="onClosePopup"
-      @changes-saved="onSaveChanges"
-    />
-    <v-data-table-server
-      v-if="isDataLoaded"
-      noDataText="Нет данных"
-      itemsPerPageText="Пункты на странице:"
-      loadingText="Загрузка данных"
-      :headers="toolTableHeaders"
-      :items="formattedTools"
-      :itemsLength="toolsTotalCount"
-      :items-per-page="filters.itemsPerPage"
-      :page="filters.currentPage"
-      :loading="isLoading"
-      :items-per-page-options="[15, 50, 100, 300]"
-      density="compact"
-      @update:page="onChangePage"
-      @update:items-per-page="onUpdateItemsPerPage"
-      @click:row="onEditRow"
-      class="elevation-1"
-      hover
-      fixed-header
-      width="true"
-    >
-      <template v-slot:item.index="{ index }">
-        <td class="index">{{ index + 1 }}</td>
-      </template>
-      <!--name-->
-      <template v-slot:item.name="{ item }">
-        <td :class="getClassForItem(item)" style="white-space: nowrap">
-          {{ item.name }}
-        </td>
-      </template>
-      <template v-slot:item.sklad="{ item }">
-        <td :class="getClassForItem(item)" style="white-space: nowrap">
-          {{ item.sklad }}
-        </td>
-      </template>
-      <template v-slot:item.norma="{ item }">
-        <td :class="getClassForItem(item)" style="white-space: nowrap">
-          {{ item.norma }}
-        </td>
-      </template>
-      <template v-slot:item.zakaz="{ item }">
-        <td :class="getClassForItem(item)" style="white-space: nowrap">
-          {{ calculateOrder(item) }}
-        </td>
-      </template>
-    </v-data-table-server>
+    <v-row>
+      <v-col cols="12">
+        <v-table hover="true">
+          <thead>
+            <tr>
+              <th class="text-left">№</th>
+              <th class="text-left">id</th>
+              <th class="text-left">Сумма</th>
+              <th class="text-left">Мой комментарий</th>
+              <th class="text-left">Моя категория</th>
+              <th class="text-left">Комментарий</th>
+              <th class="text-left">Категория</th>
+              <th class="text-left">Время</th>
+              <th class="text-left">Дата</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(transaction, index) in transactions"
+              :key="transaction.transaction_id"
+              :class="{ alternateBackground: shouldAlternateBackground(index) }"
+              @click="onEditRow(transaction)"
+            >
+              <td :style="{ color: 'gray' }">{{ index + 1 }}</td>
+              <td :style="{ color: 'gray' }">
+                {{ transaction.transaction_id }}
+              </td>
+              <td
+                :style="{
+                  color: transaction.operation_amount >= 0 ? 'green' : 'red',
+                }"
+              >
+                {{ transaction.operation_amount }}
+                {{ transaction.operation_currency }}
+              </td>
+              <td>{{ transaction.my_description }}</td>
+              <td>{{ transaction.my_category }}</td>
+              <td>{{ transaction.description }}</td>
+              <td>{{ transaction.category }}</td>
+              <td>
+                {{ formatTime(transaction.date_of_operation) }}
+              </td>
+              <td :style="dayOfWeekStyle(transaction.date_of_operation)">
+                {{ formatDayWeek(transaction.date_of_operation) }}
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script>
+import { transactionsApi } from '../../tool/api/transactions'
+import { format, parseISO } from 'date-fns'
 import EditToolModal from './Modal.vue'
-import ToolFilter from '@/modules/tool/components/ToolFilter.vue'
-import { VDataTableServer } from 'vuetify/labs/VDataTable'
 
 export default {
-  emits: ['changes-saved', 'canceled', 'page-changed', 'page-limit-changed'],
-  components: {
-    VDataTableServer,
-    EditToolModal,
-    ToolFilter,
-  },
-  props: {
-    toolsTotalCount: {
-      type: Number,
-      default: 0,
-    },
-    formattedTools: {
-      type: Array,
-      default: () => [],
-    },
-    filters: {
-      type: Object,
-      required: true,
-    },
-    isLoading: {
-      type: Boolean,
-      default: false,
-    },
-    paramsList: {
-      type: Array,
-      default: () => [],
-    },
-    namespace: {
-      type: String,
-      default: 'tool',
-    },
-  },
+  components: { EditToolModal },
   data() {
     return {
-      activeTabType: 'Catalog', // Например, 'Catalog', 'Sklad', 'Give' и т.д.
+      weekDays: {
+        Mon: 'ПН',
+        Tue: 'ВТ',
+        Wed: 'СР',
+        Thu: 'ЧТ',
+        Fri: 'ПТ',
+        Sat: 'СБ',
+        Sun: 'ВС',
+      },
+      transactions: [],
+      selectedTransaction: null,
       openDialog: false,
-      isDataLoaded: false,
-      editingToolId: null, //редактирование идентификатора инструмента
-      toolTableHeaders: [], //заголовки таблиц инструментов
+      isModalActive: false,
+      transaction: {
+        transaction_id: null,
+        my_description: null,
+        my_category: null,
+        operation_amount: null,
+        date_of_operation: null,
+        operation_currency: null,
+      },
     }
   },
-  watch: {
-    paramsList: {
-      immediate: true,
-      handler(newVal) {
-        this.toolTableHeaders = [
-          { title: '№', key: 'index', sortable: false },
-          { title: 'Маркировка', key: 'name', sortable: false },
-          ...(newVal && newVal.length > 0
-            ? newVal.map((param) => ({
-                title: param.label,
-                key: param.key,
-                sortable: true,
-              }))
-            : []),
-          // { title: 'Действие', key: 'actions', sortable: false },
-          { title: 'Норма', key: 'norma', sortable: false },
-          { title: 'Склад', key: 'sklad', sortable: false },
-          { title: 'Заказ', key: 'zakaz', sortable: false },
-        ]
-      },
-    },
+  props: {
+    selectedYear: Number,
+    selectedMonth: Number,
   },
-
-  async mounted() {
-    this.isDataLoaded = true
+  computed: {
+    alternatedBackgrounds() {
+      return this.transactions.map((transaction, index, array) => {
+        if (index === 0) return false
+        const prevDate = format(
+          parseISO(array[index - 1].date_of_operation),
+          'yyyy-MM-dd'
+        )
+        const currentDate = format(
+          parseISO(transaction.date_of_operation),
+          'yyyy-MM-dd'
+        )
+        return prevDate !== currentDate
+      })
+    },
   },
   methods: {
-    onIssueTool(event, item) {
-      event.stopPropagation() // Предотвратить всплытие события
-      console.log('Выдать инструмент:', item)
-    },
-    calculateOrder(tool) {
-      if (tool.norma || tool.sklad) return tool.norma - tool.sklad
-    },
-    getClassForItem(item) {
-      return { grey: !item.sklad || item.sklad === 0 }
-    },
-    async onChangePage(page) {
-      this.$emit('page-changed', page)
-    },
-    async onUpdateItemsPerPage(itemsPerPage) {
-      this.$emit('page-limit-changed', itemsPerPage)
-    },
-    onClosePopup() {
-      this.openDialog = false
-    },
     onSaveChanges() {
       this.openDialog = false
       this.$emit('changes-saved')
     },
-    onAddTool() {
-      this.editingToolId = null
+    onClosePopup() {
+      this.openDialog = false
+    },
+    onCancel() {
+      this.$emit('canceled')
+    },
+    closeModal() {
+      this.isModalActive = false
+    },
+    onEditRow(transaction) {
+      this.selectedTransaction = transaction
       this.openDialog = true
     },
-    onEditRow(event, { item: tool }) {
-      this.editingToolId = tool.id
-      this.openDialog = true
+    dayOfWeekStyle(timestamp) {
+      const dayOfWeek = this.formatDayWeek(timestamp)
+      if (dayOfWeek === 'СБ' || dayOfWeek === 'ВС') {
+        return { color: 'red' }
+      }
+      return { color: 'white' }
     },
+    shouldAlternateBackground(index) {
+      return this.alternatedBackgrounds[index]
+    },
+    formatDayWeek(timestamp) {
+      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
+      const date = parseISO(timestamp)
+      const dayOfWeek = format(date, 'EEE')
+      return this.weekDays[dayOfWeek] || dayOfWeek
+    },
+    formatTime(timestamp) {
+      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
+      const date = parseISO(timestamp)
+      return format(date, 'hh:mm')
+    },
+
+    async fetchTransactions(year, month) {
+      try {
+        this.transactions =
+          await transactionsApi.getTransactionsForMonthAndYear(year, month)
+      } catch (error) {
+        console.error('Ошибка при загрузке транзакций:', error)
+      }
+    },
+  },
+  mounted() {
+    if (this.selectedYear && this.selectedMonth) {
+      this.fetchTransactions(this.selectedYear, this.selectedMonth)
+    }
   },
 }
 </script>
 
-<style scoped>
-.index {
-  max-width: 40px !important;
-  font-size: 0.9em;
-  color: grey;
-}
-.grey {
-  color: grey;
+<style>
+.alternateBackground {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 </style>

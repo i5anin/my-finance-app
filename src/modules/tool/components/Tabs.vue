@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import FinanceTable from '@/modules/editor-finance/components/FinanceTable.vue'
+import FinanceTable from '@/modules/editor-finance/components/Table.vue'
 import Chart from '@/modules/tool/components/Chart.vue'
 
 export default {
