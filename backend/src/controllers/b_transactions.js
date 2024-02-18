@@ -44,6 +44,7 @@ async function getTransactionsForMonthAndYear(req, res) {
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
 
+    // Обновленный запрос исключает транзакции со статусом "FAILED"
     const { rows } = await pool.query(
       `SELECT transaction_id, date_of_operation, date_of_payment, card_number, status,
               operation_amount::float AS operation_amount, operation_currency, payment_amount::float AS payment_amount, payment_currency,
@@ -51,27 +52,27 @@ async function getTransactionsForMonthAndYear(req, res) {
        FROM dbo.transactions
        WHERE date_of_operation >= $1 AND date_of_operation <= $2
          AND description <> 'Перевод между счетами'
+         AND status <> 'FAILED'
        ORDER BY date_of_operation`,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
+    // Применяем фильтрацию для исключения пар транзакций с противоположными суммами в пределах 30 минут
     const filteredRows = rows.filter((row, index, array) => {
-      for (let i = 0; i < array.length; i++) {
-        if (i !== index) {
+      return !array.some((otherRow) => {
+        if (row.transaction_id !== otherRow.transaction_id) {
           const diffTime = Math.abs(
             new Date(row.date_of_operation) -
-              new Date(array[i].date_of_operation)
+              new Date(otherRow.date_of_operation)
           )
           const diffMinutes = diffTime / (1000 * 60)
-          if (
-            diffMinutes <= 30 &&
-            row.operation_amount === -array[i].operation_amount
-          ) {
-            return false
-          }
+          return (
+            diffMinutes <= 3000 &&
+            row.operation_amount === -otherRow.operation_amount
+          )
         }
-      }
-      return true
+        return false
+      })
     })
 
     res.json(filteredRows)

@@ -15,7 +15,7 @@
         <v-table hover="true">
           <thead>
             <tr>
-              <th class="text-left">№</th>
+              <th class="text-left">Дата</th>
               <th class="text-left">id</th>
               <th class="text-left">Сумма</th>
               <th class="text-left">Мой комментарий</th>
@@ -23,7 +23,7 @@
               <th class="text-left">Комментарий</th>
               <th class="text-left">Категория</th>
               <th class="text-left">Время</th>
-              <th class="text-left">Дата</th>
+              <th class="text-left">Неделя</th>
             </tr>
           </thead>
           <tbody>
@@ -33,7 +33,10 @@
               :class="{ alternateBackground: shouldAlternateBackground(index) }"
               @click="onEditRow(transaction)"
             >
-              <td :style="{ color: 'gray' }">{{ index + 1 }}</td>
+              <!--              <td :style="{ color: 'gray' }">{{ index + 1 }}</td>-->
+              <td :style="{ color: 'gray' }">
+                {{ formatDate(transaction.date_of_operation) }}
+              </td>
               <td :style="{ color: 'gray' }">
                 {{ transaction.transaction_id }}
               </td>
@@ -117,6 +120,11 @@ export default {
     },
   },
   methods: {
+    formatDate(timestamp) {
+      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
+      const date = parseISO(timestamp)
+      return format(date, 'd MMM') // '11 февраля' для даты '2024-02-11'
+    },
     onSaveChanges() {
       this.openDialog = false
       this.$emit('changes-saved')
