@@ -14,17 +14,18 @@ async function getIncomeAndExpensePerMonth(req, res) {
   try {
     const { rows } = await pool.query(
       `SELECT
-         DATE_TRUNC('month', date_of_operation) AS month,
-         SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END) AS total_income,
-         SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END) AS total_expense,
-         SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END) +
-         SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END) AS net_income
-       FROM
-         dbo.transactions
-       WHERE
-         status != 'FAILED'
-       GROUP BY month
-       ORDER BY month DESC`
+  DATE_TRUNC('month', date) AS month,
+  COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) AS total_income,
+  COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0) AS total_expense,
+  COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) +
+  COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0) AS net_income
+FROM
+  (SELECT date_of_operation AS date, operation_amount FROM dbo.transactions WHERE status != 'FAILED'
+   UNION ALL
+   SELECT DATE_TRUNC('month', NOW() AT TIME ZONE 'Europe/Moscow'), 0) subquery
+GROUP BY month
+ORDER BY month DESC
+`
     )
 
     res.json(rows)
@@ -45,16 +46,35 @@ async function getTransactionsForMonthAndYear(req, res) {
 
     const { rows } = await pool.query(
       `SELECT transaction_id, date_of_operation, date_of_payment, card_number, status,
-              operation_amount, operation_currency, payment_amount, payment_currency,
+              operation_amount::float AS operation_amount, operation_currency, payment_amount::float AS payment_amount, payment_currency,
               cashback, category, mcc, description, bonuses, rounding, total_amount_with_rounding
        FROM dbo.transactions
        WHERE date_of_operation >= $1 AND date_of_operation <= $2
          AND description <> 'Перевод между счетами'
-       ORDER BY date_of_operation DESC`,
+       ORDER BY date_of_operation`,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
-    res.json(rows)
+    const filteredRows = rows.filter((row, index, array) => {
+      for (let i = 0; i < array.length; i++) {
+        if (i !== index) {
+          const diffTime = Math.abs(
+            new Date(row.date_of_operation) -
+              new Date(array[i].date_of_operation)
+          )
+          const diffMinutes = diffTime / (1000 * 60)
+          if (
+            diffMinutes <= 30 &&
+            row.operation_amount === -array[i].operation_amount
+          ) {
+            return false
+          }
+        }
+      }
+      return true
+    })
+
+    res.json(filteredRows)
   } catch (error) {
     console.error('Error while fetching transactions:', error)
     res.status(500).send(error.message)
