@@ -40,6 +40,7 @@
               <td
                 :style="{
                   color: transaction.operation_amount >= 0 ? 'green' : 'red',
+                  textAlign: 'right',
                 }"
               >
                 {{ transaction.operation_amount }}
@@ -175,5 +176,8 @@ export default {
 <style>
 .alternateBackground {
   background-color: rgba(255, 255, 255, 0.03);
+}
+td {
+  white-space: nowrap;
 }
 </style>
