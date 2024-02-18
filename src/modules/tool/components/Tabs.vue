@@ -19,6 +19,11 @@
           {{ month.name }}
         </v-tab>
       </v-tabs>
+      <MonthlySummary
+        :year="parseInt(yearTab, 10)"
+        :month="getSelectedMonthIndex(monthTab)"
+      />
+
       <Chart
         :selectedYear="parseInt(yearTab, 10)"
         :selectedMonth="getSelectedMonthIndex(monthTab)"
@@ -45,9 +50,10 @@
 <script>
 import FinanceTable from '@/modules/editor-finance/components/Table.vue'
 import Chart from '@/modules/tool/components/Chart.vue'
+import MonthlySummary from '@/modules/tool/components/tabs/MonthlySummary.vue'
 
 export default {
-  components: { Chart },
+  components: { MonthlySummary, Chart },
   data() {
     const currentYear = new Date().getFullYear()
     const currentMonth = new Date().getMonth() + 1

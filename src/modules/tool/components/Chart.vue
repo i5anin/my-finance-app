@@ -28,7 +28,7 @@ export default defineComponent({
     const { selectedYear, selectedMonth } = toRefs(props)
     const data = ref([])
     const direction = ref('horizontal')
-    const margin = ref({ left: 0, top: 50, right: 50, bottom: 0 })
+    const margin = ref({ left: 0, top: 100, right: 100, bottom: 0 })
 
     const loadData = async () => {
       if (!selectedYear.value || !selectedMonth.value) return

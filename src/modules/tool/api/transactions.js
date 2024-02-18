@@ -23,4 +23,10 @@ export const transactionsApi = {
       .get('/years-months')
       .then(handleResponse)
       .catch(handleApiError),
+
+  getIncomeExpenseProfitForMonthAndYear: async (year, month) =>
+    axiosInstance
+      .get(`/transactions/sum/${year}-${month}`)
+      .then(handleResponse)
+      .catch(handleApiError),
 }

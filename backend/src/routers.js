@@ -13,6 +13,12 @@ router.get('/database-info', loginController.getDatabaseInfo)
 
 router.get('/transactions/month', finance.getIncomeAndExpensePerMonth)
 router.get('/transactions/:year-:month', finance.getTransactionsForMonthAndYear)
+
+router.get(
+  '/transactions/sum/:year-:month',
+  finance.getIncomeExpenseProfitForMonthAndYear
+)
+
 router.get('/transactions/chart/:year-:month', finance.getChartForMonthAndYear)
 router.get('/years-months', finance.getAvailableYearsAndMonths)
 

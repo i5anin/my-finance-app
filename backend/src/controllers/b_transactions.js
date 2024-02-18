@@ -35,6 +35,52 @@ ORDER BY month DESC
   }
 }
 
+// В controllers/b_transactions.js
+// В файле controllers/b_transactions.js
+
+async function getIncomeExpenseProfitForMonthAndYear(req, res) {
+  const { year, month } = req.params
+
+  try {
+    const query = `
+      SELECT
+        COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) AS total_income,
+        COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0) AS total_expense,
+        (COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) +
+        COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0)) AS net_profit
+      FROM
+        dbo.transactions
+      WHERE
+        EXTRACT(YEAR FROM date_of_operation) = $1 AND
+        EXTRACT(MONTH FROM date_of_operation) = $2 AND
+        status != 'FAILED'
+    `
+
+    const { rows } = await pool.query(query, [year, month])
+
+    if (rows.length > 0) {
+      res.json({
+        year: year,
+        month: month,
+        total_income: rows[0].total_income,
+        total_expense: rows[0].total_expense,
+        net_profit: rows[0].net_profit,
+      })
+    } else {
+      res.json({
+        year: year,
+        month: month,
+        total_income: 0,
+        total_expense: 0,
+        net_profit: 0,
+      })
+    }
+  } catch (error) {
+    console.error('Error while fetching income, expense, and profit:', error)
+    res.status(500).send(error.message)
+  }
+}
+
 // Функция для получения транзакций за текущий месяц
 async function getTransactionsForMonthAndYear(req, res) {
   try {
@@ -160,5 +206,6 @@ module.exports = {
   getTransactionsForMonthAndYear,
   getAvailableYearsAndMonths,
   getChartForMonthAndYear,
+  getIncomeExpenseProfitForMonthAndYear,
   getAllTransactions,
 }
