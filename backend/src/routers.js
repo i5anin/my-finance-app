@@ -14,6 +14,7 @@ router.get('/database-info', loginController.getDatabaseInfo)
 router.get('/transactions/month', finance.getIncomeAndExpensePerMonth)
 router.get('/transactions/:year-:month', finance.getTransactionsForMonthAndYear)
 
+router.get('/transactions/sum', finance.getMonthlyIncomeExpenseProfit)
 router.get(
   '/transactions/sum/:year-:month',
   finance.getIncomeExpenseProfitForMonthAndYear

@@ -50,7 +50,7 @@
 <script>
 import FinanceTable from '@/modules/editor-finance/components/Table.vue'
 import Chart from '@/modules/tool/components/Chart.vue'
-import MonthlySummary from '@/modules/tool/components/tabs/MonthlySummary.vue'
+import MonthlySummary from '@/modules/editor-finance/components/MonthlySummary.vue'
 
 export default {
   components: { MonthlySummary, Chart },

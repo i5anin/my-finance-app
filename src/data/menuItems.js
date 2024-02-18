@@ -64,8 +64,8 @@ export const plotsMenuItems = [
     icon: 'mdi-tools',
     access: ['admin', 'hohlov'],
     items: [
-      { title: 'Ремонт оборудования' },
-      { title: 'Закупка инструмента' },
+      // { title: 'Ремонт оборудования' },
+      { title: 'Финансы по месяцам', path: '/FinanceSumMonth' },
       { title: 'Финансы', path: '/Finance' },
     ],
   },

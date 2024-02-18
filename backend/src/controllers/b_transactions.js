@@ -38,6 +38,55 @@ ORDER BY month DESC
 // В controllers/b_transactions.js
 // В файле controllers/b_transactions.js
 
+async function getMonthlyIncomeExpenseProfit(req, res) {
+  try {
+    const query = `
+      SELECT
+        EXTRACT(YEAR FROM date_of_operation) AS year,
+        EXTRACT(MONTH FROM date_of_operation) AS month,
+        COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) AS total_income,
+        COALESCE(SUM(CASE WHEN operation_amount < 0 THEN ABS(operation_amount) ELSE 0 END), 0) AS total_expense,
+        COALESCE(SUM(operation_amount), 0) AS net_profit
+      FROM
+        dbo.transactions
+      WHERE
+        description <> 'Перевод между счетами' AND
+        status <> 'FAILED'
+      GROUP BY
+        EXTRACT(YEAR FROM date_of_operation),
+        EXTRACT(MONTH FROM date_of_operation)
+      ORDER BY
+        year DESC,
+        month DESC
+    `
+
+    const { rows } = await pool.query(query)
+
+    const formattedResults = rows.map((row) => ({
+      year: row.year,
+      month: row.month,
+      total_income: parseFloat(row.total_income).toFixed(2),
+      total_expense: parseFloat(row.total_expense).toFixed(2),
+      net_profit: parseFloat(row.net_profit).toFixed(2),
+    }))
+
+    // Фильтрация результатов, чтобы начать с февраля 2024 и идти в обратном порядке
+    const sortedAndFilteredResults = formattedResults.sort((a, b) => {
+      const dateA = new Date(a.year, a.month - 1)
+      const dateB = new Date(b.year, b.month - 1)
+      return dateB - dateA // Сортировка по убыванию
+    })
+
+    res.json(sortedAndFilteredResults)
+  } catch (error) {
+    console.error(
+      'Error while fetching monthly income, expense, and profit descending:',
+      error
+    )
+    res.status(500).send(error.message)
+  }
+}
+
 async function getIncomeExpenseProfitForMonthAndYear(req, res) {
   const { year, month } = req.params
 
@@ -45,34 +94,35 @@ async function getIncomeExpenseProfitForMonthAndYear(req, res) {
     const query = `
       SELECT
         COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) AS total_income,
-        COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0) AS total_expense,
-        (COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) +
-        COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0)) AS net_profit
+        COALESCE(SUM(CASE WHEN operation_amount < 0 THEN ABS(operation_amount) ELSE 0 END), 0) AS total_expense,
+        (COALESCE(SUM(operation_amount), 0)) AS net_profit
       FROM
         dbo.transactions
       WHERE
         EXTRACT(YEAR FROM date_of_operation) = $1 AND
         EXTRACT(MONTH FROM date_of_operation) = $2 AND
-        status != 'FAILED'
+        description <> 'Перевод между счетами' AND
+        status <> 'FAILED'
     `
 
     const { rows } = await pool.query(query, [year, month])
 
     if (rows.length > 0) {
+      const row = rows[0]
       res.json({
-        year: year,
-        month: month,
-        total_income: rows[0].total_income,
-        total_expense: rows[0].total_expense,
-        net_profit: rows[0].net_profit,
+        year,
+        month,
+        total_income: parseFloat(row.total_income).toFixed(2),
+        total_expense: parseFloat(row.total_expense).toFixed(2),
+        net_profit: parseFloat(row.net_profit).toFixed(2),
       })
     } else {
       res.json({
-        year: year,
-        month: month,
-        total_income: 0,
-        total_expense: 0,
-        net_profit: 0,
+        year,
+        month,
+        total_income: '0.00',
+        total_expense: '0.00',
+        net_profit: '0.00',
       })
     }
   } catch (error) {
@@ -208,4 +258,5 @@ module.exports = {
   getChartForMonthAndYear,
   getIncomeExpenseProfitForMonthAndYear,
   getAllTransactions,
+  getMonthlyIncomeExpenseProfit,
 }

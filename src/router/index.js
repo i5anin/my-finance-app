@@ -1,48 +1,33 @@
 // src/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
-import Tool from '@/modules/tool/components/Tabs.vue'
+import Finance from '@/modules/editor-finance/components/Tabs.vue'
+import FinanceSumMonth from '@/modules/editor-finance/components/FinanceSumMonth.vue'
 import Login from '@/views/Login.vue'
 import Error404 from '@/views/404.vue'
 
-export const Routes = {
-  LOGIN: '/Login',
-}
-
-// const authGuard = {
-//   Home(to, from, next) {
-//     if (localStorage.getItem('user')) {
-//       next()
-//     } else {
-//       next('/Login')
-//     }
-//   },
-// }
+export const Routes = { LOGIN: '/Login' }
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home,
-    // beforeEnter: authGuard.Home
   },
   {
     path: Routes.LOGIN,
     name: 'Login',
     component: Login,
   },
-  // {
-  //   path: '/Tool/:parentId',
-  //   name: 'ToolWithParentId',
-  //   component: Tool,
-  //   props: true,
-  // },
-  // Маршрут без параметра parentId
   {
     path: '/Finance',
     name: 'Finance',
-    component: Tool,
-    // props: { parentId: 0 }, // Здесь мы устанавливаем parentId по умолчанию
+    component: Finance,
+  },
+  {
+    path: '/FinanceSumMonth',
+    name: 'FinanceSumMonth',
+    component: FinanceSumMonth,
   },
   {
     path: '/:catchAll(.*)',
