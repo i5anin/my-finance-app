@@ -19,7 +19,11 @@
           {{ month.name }}
         </v-tab>
       </v-tabs>
-      <Chart></Chart>
+      <Chart
+        :selectedYear="parseInt(yearTab, 10)"
+        :selectedMonth="getSelectedMonthIndex(monthTab)"
+      />
+
       <v-window v-model="monthTab">
         <v-window-item
           v-for="month in monthsYears"

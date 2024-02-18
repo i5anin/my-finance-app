@@ -164,16 +164,20 @@ export default {
       return format(date, 'hh:mm')
     },
 
-    async fetchTransactions(year, month) {
+    async fetchTransactions() {
       try {
         this.transactions =
-          await transactionsApi.getTransactionsForMonthAndYear(year, month)
+          await transactionsApi.getTransactionsForMonthAndYear(
+            this.selectedYear,
+            this.selectedMonth
+          )
       } catch (error) {
         console.error('Ошибка при загрузке транзакций:', error)
       }
     },
   },
   mounted() {
+    this.fetchTransactions()
     if (this.selectedYear && this.selectedMonth) {
       this.fetchTransactions(this.selectedYear, this.selectedMonth)
     }
