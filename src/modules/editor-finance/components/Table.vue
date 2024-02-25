@@ -80,15 +80,6 @@ export default {
     return {
       colorGreen: '#74e274', // более тусклый зеленый
       colorRed: '#d96c6c', // более тусклый красный
-      weekDays: {
-        Mon: 'ПН',
-        Tue: 'ВТ',
-        Wed: 'СР',
-        Thu: 'ЧТ',
-        Fri: 'ПТ',
-        Sat: 'СБ',
-        Sun: 'ВС',
-      },
       transactions: [],
       selectedTransaction: null,
       openDialog: false,
@@ -162,9 +153,11 @@ export default {
     formatDayWeek(timestamp) {
       if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
       const date = parseISO(timestamp)
-      const dayOfWeek = format(date, 'EEE')
-      return this.weekDays[dayOfWeek] || dayOfWeek
+      // Используем формат 'EEEEEE' и приводим результат к верхнему регистру
+      const dayOfWeek = format(date, 'EEEEEE', { locale: ru }).toUpperCase() // Преобразование в верхний регистр
+      return dayOfWeek // Теперь вернет 'ПН', 'ВТ' и т.д. большими буквами
     },
+
     formatTime(timestamp) {
       if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
       const date = parseISO(timestamp)
