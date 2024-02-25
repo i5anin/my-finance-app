@@ -225,7 +225,6 @@ async function getChartForMonthAndYear(req, res) {
 
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
-    const daysInMonth = lastDayOfMonth.getDate()
 
     const { rows } = await pool.query(
       `SELECT EXTRACT(DAY FROM date_of_operation) as day, SUM(operation_amount) as total
@@ -238,17 +237,10 @@ async function getChartForMonthAndYear(req, res) {
       [firstDayOfMonth, lastDayOfMonth]
     )
 
-    // Создаем массив для всех дней месяца
-    let chartData = []
-    for (let day = 1; day <= daysInMonth; day++) {
-      // Находим запись для текущего дня
-      const dayData = rows.find((row) => row.day == day)
-      // Если данных нет, используем 0
-      chartData.push({
-        name: day.toString(),
-        pl: dayData ? dayData.total : '0.00', // Убедитесь, что формат соответствует ожидаемому
-      })
-    }
+    const chartData = rows.map((row) => ({
+      name: row.day.toString(),
+      pl: row.total,
+    }))
 
     res.json(chartData)
   } catch (error) {
