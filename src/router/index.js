@@ -1,7 +1,7 @@
 // src/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
-import Finance from '@/modules/editor-finance/components/Tabs.vue'
+import Finance from '@/modules/editor-finance/components/TabsMonth.vue'
 import FinanceSumMonth from '@/modules/editor-finance/components/FinanceSumMonth.vue'
 import Login from '@/views/Login.vue'
 import Error404 from '@/views/404.vue'

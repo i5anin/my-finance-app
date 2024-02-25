@@ -49,7 +49,7 @@
 <script>
 import { transactionsApi } from '../../tool/api/transactions'
 import { format, parseISO } from 'date-fns'
-import { ru } from 'date-fns/locale' // Импорт русской локали
+import { ru } from 'date-fns/locale'
 import EditToolModal from './Modal.vue'
 
 export default {
