@@ -42,11 +42,12 @@
               </td>
               <td
                 :style="{
-                  color: transaction.operation_amount >= 0 ? 'green' : 'red',
+                  color:
+                    transaction.operation_amount >= 0 ? colorGreen : colorRed,
                   textAlign: 'right',
                 }"
               >
-                {{ transaction.operation_amount }}
+                {{ formatNumber(transaction.operation_amount) }}
                 {{ transaction.operation_currency }}
               </td>
               <td>{{ transaction.my_description }}</td>
@@ -70,12 +71,15 @@
 <script>
 import { transactionsApi } from '../../tool/api/transactions'
 import { format, parseISO } from 'date-fns'
+import { ru } from 'date-fns/locale' // Импорт русской локали
 import EditToolModal from './Modal.vue'
 
 export default {
   components: { EditToolModal },
   data() {
     return {
+      colorGreen: '#74e274', // более тусклый зеленый
+      colorRed: '#d96c6c', // более тусклый красный
       weekDays: {
         Mon: 'ПН',
         Tue: 'ВТ',
@@ -120,10 +124,13 @@ export default {
     },
   },
   methods: {
+    formatNumber(number) {
+      return Number(number).toLocaleString('ru-RU')
+    },
     formatDate(timestamp) {
       if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
       const date = parseISO(timestamp)
-      return format(date, 'd MMM') // '11 февраля' для даты '2024-02-11'
+      return format(date, 'd MMM', { locale: ru }) // Используйте локаль здесь
     },
     onSaveChanges() {
       this.openDialog = false
@@ -145,7 +152,7 @@ export default {
     dayOfWeekStyle(timestamp) {
       const dayOfWeek = this.formatDayWeek(timestamp)
       if (dayOfWeek === 'СБ' || dayOfWeek === 'ВС') {
-        return { color: 'red' }
+        return { color: this.colorRed }
       }
       return { color: 'white' }
     },
