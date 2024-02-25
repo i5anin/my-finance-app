@@ -71,7 +71,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style>
-/* Стили здесь, если необходимо */
-</style>
