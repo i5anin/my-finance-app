@@ -75,6 +75,7 @@ export default {
               transaction.operation_amount > 0
                 ? this.colorGreen
                 : this.colorRed,
+            textAlign: 'right', // Добавляем выравнивание по правому краю
           }),
         },
         {
@@ -147,7 +148,8 @@ export default {
     formatNumber(number) {
       return new Intl.NumberFormat('ru-RU', {
         style: 'decimal',
-        maximumFractionDigits: 2,
+        minimumFractionDigits: 0, // Гарантируем два десятичных знака после запятой
+        maximumFractionDigits: 0, // Ограничиваем количество до двух десятичных знаков после запятой
       }).format(number)
     },
     formatDate(timestamp) {
