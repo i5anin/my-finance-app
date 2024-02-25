@@ -226,21 +226,46 @@ async function getChartForMonthAndYear(req, res) {
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
 
+    // Запрос для получения деталей транзакций по категориям
     const { rows } = await pool.query(
-      `SELECT EXTRACT(DAY FROM date_of_operation) as day, SUM(operation_amount) as total
-       FROM dbo.transactions
-       WHERE date_of_operation >= $1
-         AND date_of_operation <= $2
-         AND description <> 'Перевод между счетами'
-       GROUP BY EXTRACT(DAY FROM date_of_operation)
-       ORDER BY day`,
+      `
+      SELECT category, operation_amount, description
+      FROM dbo.transactions
+      WHERE date_of_operation >= $1
+        AND date_of_operation <= $2
+        AND operation_amount < 0
+        AND description <> 'Перевод между счетами'
+        AND description <> 'Перевод по запросу самому себе'
+        AND description <> 'Пополнение вклада'
+    `,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
-    const chartData = rows.map((row) => ({
-      name: row.day.toString(),
-      pl: row.total,
-    }))
+    // Группировка результатов по категориям
+    const categories = rows.reduce(
+      (acc, { category, operation_amount, description }) => {
+        if (!acc[category]) {
+          acc[category] = { total: 0, transactions: [] }
+        }
+        acc[category].total += Math.abs(operation_amount)
+        acc[category].transactions.push({
+          category, // Включаем категорию в детали транзакции
+          amount: Math.abs(operation_amount).toFixed(2),
+          description,
+        })
+        return acc
+      },
+      {}
+    )
+
+    // Формирование итоговых данных для отправки
+    const chartData = Object.entries(categories)
+      .map(([name, data]) => ({
+        name,
+        pl: data.total.toFixed(2),
+        details: data.transactions,
+      }))
+      .sort((a, b) => b.pl - a.pl) // Сортировка по убыванию итоговой суммы
 
     res.json(chartData)
   } catch (error) {
@@ -257,6 +282,5 @@ module.exports = {
   getAvailableYearsAndMonths,
   getChartForMonthAndYear,
   getIncomeExpenseProfitForMonthAndYear,
-  getAllTransactions,
   getMonthlyIncomeExpenseProfit,
 }
