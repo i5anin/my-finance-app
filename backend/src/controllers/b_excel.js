@@ -112,6 +112,8 @@ async function updateTransactionsFromXLS() {
   } catch (error) {
     console.error('Error while updating transactions:', error)
   }
+
+  console.log('Transaction update process completed.')
 }
 
 module.exports = {

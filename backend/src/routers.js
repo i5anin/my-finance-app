@@ -23,7 +23,7 @@ router.get(
 router.get('/transactions/chart/:year-:month', finance.getChartForMonthAndYear)
 router.get('/years-months', finance.getAvailableYearsAndMonths)
 
-// router.get('/crate-database', db.createAndInsertTransactionsFromXLS)
+router.get('/crate-database', db.createAndInsertTransactionsFromXLS)
 router.get('/update-database', db.updateTransactionsFromXLS)
 
 router.get('/my_custom_marker', marker.myCustomMarker)

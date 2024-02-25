@@ -52,7 +52,7 @@ export default defineComponent({
     const data = ref([])
 
     const loadData = async () => {
-      if (!props.selectedYear || !props.selectedMonth) return
+      // Удалено условие для проверки props.selectedYear и props.selectedMonth
       try {
         data.value = await transactionsApi.getChartForMonthAndYear(
           props.selectedYear,

@@ -10,33 +10,6 @@ const dbConfig =
 
 // Создание пула соединений с базой данных
 const pool = new Pool(dbConfig)
-async function getIncomeAndExpensePerMonth(req, res) {
-  try {
-    const { rows } = await pool.query(
-      `SELECT
-  DATE_TRUNC('month', date) AS month,
-  COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) AS total_income,
-  COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0) AS total_expense,
-  COALESCE(SUM(CASE WHEN operation_amount > 0 THEN operation_amount ELSE 0 END), 0) +
-  COALESCE(SUM(CASE WHEN operation_amount < 0 THEN operation_amount ELSE 0 END), 0) AS net_income
-FROM
-  (SELECT date_of_operation AS date, operation_amount FROM dbo.transactions WHERE status != 'FAILED'
-   UNION ALL
-   SELECT DATE_TRUNC('month', NOW() AT TIME ZONE 'Europe/Moscow'), 0) subquery
-GROUP BY month
-ORDER BY month DESC
-`
-    )
-
-    res.json(rows)
-  } catch (error) {
-    console.error('Error while fetching income and expense per month:', error)
-    res.status(500).send(error.message)
-  }
-}
-
-// В controllers/b_transactions.js
-// В файле controllers/b_transactions.js
 
 async function getMonthlyIncomeExpenseProfit(req, res) {
   try {
@@ -51,6 +24,7 @@ async function getMonthlyIncomeExpenseProfit(req, res) {
         dbo.transactions
       WHERE
         description <> 'Перевод между счетами' AND
+        description <> 'Закрытие вклада Тинькофф Банк' AND
         status <> 'FAILED'
       GROUP BY
         EXTRACT(YEAR FROM date_of_operation),
@@ -143,13 +117,17 @@ async function getTransactionsForMonthAndYear(req, res) {
     const { rows } = await pool.query(
       `SELECT transaction_id, date_of_operation, date_of_payment, card_number, status,
               operation_amount::float AS operation_amount, operation_currency, payment_amount::float AS payment_amount, payment_currency,
-              cashback, category, mcc, description, bonuses, rounding, total_amount_with_rounding, my_category, my_comment
+              cashback, category, mcc, description, bonuses, rounding, total_amount_with_rounding,
+              CASE WHEN my_comment IS NOT NULL THEN my_comment ELSE '' END AS my_comment
        FROM dbo.transactions
        WHERE date_of_operation >= $1 AND date_of_operation <= $2
+         AND date_part('year', date_of_operation) = $3
+         AND date_part('month', date_of_operation) = $4
          AND description <> 'Перевод между счетами'
+         AND description <> 'Закрытие вклада Тинькофф Банк'
          AND status <> 'FAILED'
        ORDER BY date_of_operation`,
-      [firstDayOfMonth, lastDayOfMonth]
+      [firstDayOfMonth, lastDayOfMonth, year, month]
     )
 
     const filteredRows = rows.filter((row, index, array) => {
@@ -199,22 +177,6 @@ async function getAvailableYearsAndMonths(req, res) {
     res.status(500).send(error.message)
   }
 }
-
-async function getAllTransactions(req, res) {
-  try {
-    const { rows } = await pool.query(
-      `SELECT transaction_id, date_of_operation, date_of_payment, card_number, status,
-              operation_amount, operation_currency, payment_amount, payment_currency,
-              cashback, category, mcc, description, bonuses, rounding, total_amount_with_rounding
-       FROM dbo.transactions
-       ORDER BY date_of_operation DESC`
-    )
-    res.json(rows)
-  } catch (error) {
-    console.error('Error while fetching all transactions:', error)
-    res.status(500).send(error.message)
-  }
-}
 // main
 async function getChartForMonthAndYear(req, res) {
   try {
@@ -224,7 +186,6 @@ async function getChartForMonthAndYear(req, res) {
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
 
-    // Запрос обновлен для включения my_category
     const { rows } = await pool.query(
       `
       SELECT COALESCE(my_category, category) AS effective_category, operation_amount, description
@@ -233,13 +194,13 @@ async function getChartForMonthAndYear(req, res) {
         AND date_of_operation <= $2
         AND operation_amount < 0
         AND description <> 'Перевод между счетами'
+        AND description <> 'Закрытие вклада Тинькофф Банк'
         AND description <> 'Перевод по запросу самому себе'
         AND description <> 'Пополнение вклада'
     `,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
-    // Группировка результатов по "эффективной" категории
     const categories = rows.reduce(
       (acc, { effective_category, operation_amount, description }) => {
         if (!acc[effective_category]) {
@@ -247,7 +208,7 @@ async function getChartForMonthAndYear(req, res) {
         }
         acc[effective_category].total += Math.abs(operation_amount)
         acc[effective_category].transactions.push({
-          category: effective_category, // Используем "эффективную" категорию
+          category: effective_category,
           amount: Math.abs(operation_amount).toFixed(2),
           description,
         })
@@ -256,12 +217,19 @@ async function getChartForMonthAndYear(req, res) {
       {}
     )
 
-    // Формирование итоговых данных для отправки
+    // Вычисление общей суммы расходов
+    const totalExpenses = Object.values(categories).reduce(
+      (sum, { total }) => sum + total,
+      0
+    )
+
+    // Добавление процентов к итоговым данным
     const chartData = Object.entries(categories)
       .map(([name, data]) => ({
         name,
         pl: data.total.toFixed(2),
-        // details: data.transactions, // Можно раскомментировать для включения деталей
+        // Добавление процентной доли от общей суммы расходов
+        percentage: ((data.total / totalExpenses) * 100).toFixed(2) + '%',
       }))
       .sort((a, b) => b.pl - a.pl) // Сортировка по убыванию итоговой суммы
 
@@ -275,7 +243,6 @@ async function getChartForMonthAndYear(req, res) {
 // добавьте соответствующий маршрут
 
 module.exports = {
-  getIncomeAndExpensePerMonth,
   getTransactionsForMonthAndYear,
   getAvailableYearsAndMonths,
   getChartForMonthAndYear,
