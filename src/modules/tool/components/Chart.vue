@@ -37,8 +37,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { Chart, Responsive, Pie, Tooltip } from 'vue3-charts'
+import { defineComponent, ref, watch } from 'vue'
+import { Chart, Pie, Responsive, Tooltip } from 'vue3-charts'
 import { transactionsApi } from '../api/transactions'
 
 export default defineComponent({
@@ -54,17 +54,18 @@ export default defineComponent({
     const loadData = async () => {
       if (!props.selectedYear || !props.selectedMonth) return
       try {
-        const chartData = await transactionsApi.getChartForMonthAndYear(
+        data.value = await transactionsApi.getChartForMonthAndYear(
           props.selectedYear,
           props.selectedMonth
         )
-        data.value = chartData
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error)
       }
     }
 
-    loadData()
+    watch(() => [props.selectedYear, props.selectedMonth], loadData, {
+      immediate: true,
+    })
 
     return { data }
   },
