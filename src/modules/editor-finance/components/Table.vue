@@ -15,50 +15,30 @@
         <v-table hover="true">
           <thead>
             <tr>
-              <th class="text-left">Дата</th>
-              <th class="text-left">id</th>
-              <th class="text-left">Сумма</th>
-              <th class="text-left">Мой комментарий</th>
-              <th class="text-left">Моя категория</th>
-              <th class="text-left">Комментарий</th>
-              <th class="text-left">Категория</th>
-              <th class="text-left">Время</th>
-              <th class="text-left">Неделя</th>
+              <th
+                class="text-left"
+                v-for="column in columns"
+                :key="column.header"
+              >
+                {{ column.header }}
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="(transaction, index) in transactions"
               :key="transaction.transaction_id"
-              :class="{ alternateBackground: shouldAlternateBackground(index) }"
+              :class="{
+                'alternate-background': shouldAlternateBackground(index),
+              }"
               @click="onEditRow(transaction)"
             >
-              <!--              <td :style="{ color: 'gray' }">{{ index + 1 }}</td>-->
-              <td :style="{ color: 'gray' }">
-                {{ formatDate(transaction.date_of_operation) }}
-              </td>
-              <td :style="{ color: 'gray' }">
-                {{ transaction.transaction_id }}
-              </td>
               <td
-                :style="{
-                  color:
-                    transaction.operation_amount >= 0 ? colorGreen : colorRed,
-                  textAlign: 'right',
-                }"
+                v-for="column in columns"
+                :key="column.header"
+                :style="column.style ? column.style(transaction) : {}"
               >
-                {{ formatNumber(transaction.operation_amount) }}
-                {{ transaction.operation_currency }}
-              </td>
-              <td>{{ transaction.my_description }}</td>
-              <td>{{ transaction.my_category }}</td>
-              <td>{{ transaction.description }}</td>
-              <td>{{ transaction.category }}</td>
-              <td>
-                {{ formatTime(transaction.date_of_operation) }}
-              </td>
-              <td :style="dayOfWeekStyle(transaction.date_of_operation)">
-                {{ formatDayWeek(transaction.date_of_operation) }}
+                {{ column.value(transaction) }}
               </td>
             </tr>
           </tbody>
@@ -78,6 +58,43 @@ export default {
   components: { EditToolModal },
   data() {
     return {
+      columns: [
+        {
+          header: 'Дата',
+          value: (transaction) =>
+            this.formatDate(transaction.date_of_operation),
+          style: () => ({ color: 'grey' }),
+        },
+        {
+          header: 'Мой комментарий',
+          value: (transaction) => transaction.my_description,
+        },
+        {
+          header: 'Моя категория',
+          value: (transaction) => transaction.my_category,
+        },
+        {
+          header: 'Комментарий банка',
+          value: (transaction) => transaction.description,
+        },
+        {
+          header: 'Категория банка',
+          value: (transaction) => transaction.category,
+        },
+        {
+          header: 'Время',
+          value: (transaction) =>
+            this.formatTime(transaction.date_of_operation),
+          style: () => ({ color: 'grey' }),
+        },
+        {
+          header: 'Неделя',
+          value: (transaction) =>
+            this.formatDayWeek(transaction.date_of_operation),
+          style: (transaction) =>
+            this.dayOfWeekStyle(transaction.date_of_operation),
+        },
+      ],
       colorGreen: '#74e274', // более тусклый зеленый
       colorRed: '#d96c6c', // более тусклый красный
       transactions: [],
