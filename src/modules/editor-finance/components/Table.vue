@@ -66,6 +66,18 @@ export default {
           style: () => ({ color: 'grey' }),
         },
         {
+          header: 'Сумма',
+          value: (transaction) =>
+            this.formatNumber(transaction.operation_amount) +
+            ` ${transaction.operation_currency}`,
+          style: (transaction) => ({
+            color:
+              transaction.operation_amount > 0
+                ? this.colorGreen
+                : this.colorRed,
+          }),
+        },
+        {
           header: 'Мой комментарий',
           value: (transaction) => transaction.my_description,
         },
@@ -133,7 +145,10 @@ export default {
   },
   methods: {
     formatNumber(number) {
-      return Number(number).toLocaleString('ru-RU')
+      return new Intl.NumberFormat('ru-RU', {
+        style: 'decimal',
+        maximumFractionDigits: 2,
+      }).format(number)
     },
     formatDate(timestamp) {
       if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
