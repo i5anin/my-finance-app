@@ -78,7 +78,7 @@ export default {
         },
         {
           header: 'Мой комментарий',
-          value: (transaction) => transaction.my_description,
+          value: (transaction) => transaction.my_comment,
         },
         {
           header: 'Моя категория',
@@ -114,7 +114,7 @@ export default {
       isModalActive: false,
       transaction: {
         transaction_id: null,
-        my_description: null,
+        my_comment: null,
         my_category: null,
         operation_amount: null,
         date_of_operation: null,

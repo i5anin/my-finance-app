@@ -140,11 +140,10 @@ async function getTransactionsForMonthAndYear(req, res) {
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
 
-    // Обновленный запрос исключает транзакции со статусом "FAILED"
     const { rows } = await pool.query(
       `SELECT transaction_id, date_of_operation, date_of_payment, card_number, status,
               operation_amount::float AS operation_amount, operation_currency, payment_amount::float AS payment_amount, payment_currency,
-              cashback, category, mcc, description, bonuses, rounding, total_amount_with_rounding
+              cashback, category, mcc, description, bonuses, rounding, total_amount_with_rounding, my_category, my_comment
        FROM dbo.transactions
        WHERE date_of_operation >= $1 AND date_of_operation <= $2
          AND description <> 'Перевод между счетами'
@@ -153,7 +152,6 @@ async function getTransactionsForMonthAndYear(req, res) {
       [firstDayOfMonth, lastDayOfMonth]
     )
 
-    // Применяем фильтрацию для исключения пар транзакций с противоположными суммами в пределах 30 минут
     const filteredRows = rows.filter((row, index, array) => {
       return !array.some((otherRow) => {
         if (row.transaction_id !== otherRow.transaction_id) {
@@ -163,7 +161,7 @@ async function getTransactionsForMonthAndYear(req, res) {
           )
           const diffMinutes = diffTime / (1000 * 60)
           return (
-            diffMinutes <= 3000 &&
+            diffMinutes <= 30 &&
             row.operation_amount === -otherRow.operation_amount
           )
         }
@@ -226,10 +224,10 @@ async function getChartForMonthAndYear(req, res) {
     const firstDayOfMonth = new Date(year, month - 1, 1)
     const lastDayOfMonth = new Date(year, month, 0)
 
-    // Запрос для получения деталей транзакций по категориям
+    // Запрос обновлен для включения my_category
     const { rows } = await pool.query(
       `
-      SELECT category, operation_amount, description
+      SELECT COALESCE(my_category, category) AS effective_category, operation_amount, description
       FROM dbo.transactions
       WHERE date_of_operation >= $1
         AND date_of_operation <= $2
@@ -241,15 +239,15 @@ async function getChartForMonthAndYear(req, res) {
       [firstDayOfMonth, lastDayOfMonth]
     )
 
-    // Группировка результатов по категориям
+    // Группировка результатов по "эффективной" категории
     const categories = rows.reduce(
-      (acc, { category, operation_amount, description }) => {
-        if (!acc[category]) {
-          acc[category] = { total: 0, transactions: [] }
+      (acc, { effective_category, operation_amount, description }) => {
+        if (!acc[effective_category]) {
+          acc[effective_category] = { total: 0, transactions: [] }
         }
-        acc[category].total += Math.abs(operation_amount)
-        acc[category].transactions.push({
-          category, // Включаем категорию в детали транзакции
+        acc[effective_category].total += Math.abs(operation_amount)
+        acc[effective_category].transactions.push({
+          category: effective_category, // Используем "эффективную" категорию
           amount: Math.abs(operation_amount).toFixed(2),
           description,
         })
@@ -263,7 +261,7 @@ async function getChartForMonthAndYear(req, res) {
       .map(([name, data]) => ({
         name,
         pl: data.total.toFixed(2),
-        details: data.transactions,
+        // details: data.transactions, // Можно раскомментировать для включения деталей
       }))
       .sort((a, b) => b.pl - a.pl) // Сортировка по убыванию итоговой суммы
 
