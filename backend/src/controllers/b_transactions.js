@@ -61,7 +61,7 @@ async function getMonthlyIncomeExpenseProfit(req, res) {
   }
 }
 
-async function getIncomeExpenseProfitForMonthAndYear(req, res) {
+async function getIncomeExpenseProfit(req, res) {
   const { year, month } = req.params
 
   try {
@@ -126,7 +126,7 @@ async function getTransactionsForMonthAndYear(req, res) {
          AND description <> 'Перевод между счетами'
          AND description <> 'Закрытие вклада Тинькофф Банк'
          AND status <> 'FAILED'
-       ORDER BY date_of_operation`,
+       ORDER BY date_of_operation DESC`, // Изменено на DESC для сортировки от новых к старым
       [firstDayOfMonth, lastDayOfMonth, year, month]
     )
 
@@ -240,12 +240,33 @@ async function getChartForMonthAndYear(req, res) {
   }
 }
 
+async function getTransactionById(req, res) {
+  const { id } = req.params // Получение id из параметров запроса
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM dbo.transactions WHERE transaction_id = $1`,
+      [id]
+    )
+
+    if (rows.length > 0) {
+      res.json(rows[0]) // Возвращаем найденную транзакцию
+    } else {
+      res.status(404).send('Transaction not found') // Если транзакция не найдена, отправляем 404
+    }
+  } catch (error) {
+    console.error('Error while fetching transaction by id:', error)
+    res.status(500).send(error.message) // В случае ошибки возвращаем статус 500
+  }
+}
+
 // добавьте соответствующий маршрут
 
 module.exports = {
+  getTransactionById,
   getTransactionsForMonthAndYear,
   getAvailableYearsAndMonths,
   getChartForMonthAndYear,
-  getIncomeExpenseProfitForMonthAndYear,
+  getIncomeExpenseProfit,
   getMonthlyIncomeExpenseProfit,
 }

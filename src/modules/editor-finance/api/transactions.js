@@ -35,4 +35,10 @@ export const transactionsApi = {
       .get('/transactions/sum')
       .then(handleResponse)
       .catch(handleApiError),
+
+  getTransactionById: async (id) =>
+    axiosInstance
+      .get(`/transactions/id/${id}`)
+      .then(handleResponse)
+      .catch(handleApiError),
 }

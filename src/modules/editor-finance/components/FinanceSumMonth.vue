@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { transactionsApi } from '@/modules/tool/api/transactions'
+import { transactionsApi } from '@/modules/editor-finance/api/transactions'
 
 export default {
   data() {

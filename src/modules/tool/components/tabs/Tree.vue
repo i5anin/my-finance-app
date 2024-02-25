@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { toolTreeApi } from '@/modules/tool/api/transactions'
+import { toolTreeApi } from '@/modules/editor-finance/api/transactions'
 import TreeNode from '../TreeNode.vue'
 
 export default {

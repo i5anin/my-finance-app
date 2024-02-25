@@ -39,7 +39,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
 import { Chart, Pie, Responsive, Tooltip } from 'vue3-charts'
-import { transactionsApi } from '../api/transactions'
+import { transactionsApi } from '../../editor-finance/api/transactions'
 
 export default defineComponent({
   name: 'CircularChart',

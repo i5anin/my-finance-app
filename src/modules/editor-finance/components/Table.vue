@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { transactionsApi } from '../../tool/api/transactions'
+import { transactionsApi } from '../api/transactions'
 import { format, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import EditToolModal from './Modal.vue'
