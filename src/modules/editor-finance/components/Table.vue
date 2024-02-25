@@ -153,9 +153,7 @@ export default {
     formatDayWeek(timestamp) {
       if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
       const date = parseISO(timestamp)
-      // Используем формат 'EEEEEE' и приводим результат к верхнему регистру
-      const dayOfWeek = format(date, 'EEEEEE', { locale: ru }).toUpperCase() // Преобразование в верхний регистр
-      return dayOfWeek // Теперь вернет 'ПН', 'ВТ' и т.д. большими буквами
+      return format(date, 'EEEEEE', { locale: ru }).toUpperCase()
     },
 
     formatTime(timestamp) {
