@@ -28,9 +28,7 @@
             <tr
               v-for="(transaction, index) in transactions"
               :key="transaction.transaction_id"
-              :class="{
-                'alternate-background': shouldAlternateBackground(index),
-              }"
+              :class="{ 'alternate-background': alternatedBackgrounds[index] }"
               @click="onEditRow(transaction)"
             >
               <td
@@ -148,16 +146,17 @@ export default {
     formatNumber(number) {
       return new Intl.NumberFormat('ru-RU', {
         style: 'decimal',
-        minimumFractionDigits: 0, // Гарантируем два десятичных знака после запятой
-        maximumFractionDigits: 0, // Ограничиваем количество до двух десятичных знаков после запятой
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
       }).format(number)
     },
     formatDate(timestamp) {
-      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
-      const date = parseISO(timestamp)
-      return format(date, 'd MMM', { locale: ru }) // Используйте локаль здесь
+      return timestamp
+        ? format(parseISO(timestamp), 'd MMM', { locale: ru })
+        : 'Неверная дата'
     },
     onSaveChanges() {
+      this.openDialog = false
       this.openDialog = false
       this.$emit('changes-saved')
     },
@@ -185,15 +184,12 @@ export default {
       return this.alternatedBackgrounds[index]
     },
     formatDayWeek(timestamp) {
-      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
-      const date = parseISO(timestamp)
-      return format(date, 'EEEEEE', { locale: ru }).toUpperCase()
+      return timestamp
+        ? format(parseISO(timestamp), 'EEEEEE', { locale: ru }).toUpperCase()
+        : 'Неверная дата'
     },
-
     formatTime(timestamp) {
-      if (!timestamp || !Date.parse(timestamp)) return 'Неверная дата'
-      const date = parseISO(timestamp)
-      return format(date, 'hh:mm')
+      return timestamp ? format(parseISO(timestamp), 'HH:mm') : 'Неверная дата'
     },
 
     async fetchTransactions() {
