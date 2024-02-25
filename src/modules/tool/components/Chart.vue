@@ -1,50 +1,25 @@
 <template>
-  <Responsive class="w-full">
-    <template #main="{ width }">
-      <Chart
-        direction="circular"
-        :size="{ width, height: 400 }"
-        :data="data"
-        :margin="{
-          left: Math.round((width - 360) / 2),
-          top: 20,
-          right: 0,
-          bottom: 20,
-        }"
-        :axis="axis"
-        :config="{ controlHover: false }"
-      >
-        <template #layers>
-          <Pie
-            :dataKeys="['name', 'pl']"
-            :pie-style="{ innerRadius: 100, padAngle: 0.05 }"
-          />
-        </template>
-        <template #widgets>
-          <Tooltip
-            :config="{
-              name: {},
-              avg: { hide: true },
-              pl: { label: 'value' },
-              inc: { hide: true },
-            }"
-            hideLine
-          />
-        </template>
-      </Chart>
+  <Chart
+    :size="{ width: 1100, height: 400 }"
+    :data="data"
+    :margin="margin"
+    :direction="direction"
+  >
+    <template #layers>
+      <Grid strokeDasharray="2,2" />
+      <Bar :dataKeys="['name', 'pl']" />
     </template>
-  </Responsive>
+  </Chart>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from 'vue'
-import { Chart, Responsive, Pie, Tooltip } from 'vue3-charts'
-import { toRefs } from 'vue'
-import { transactionsApi } from '../api/transactions' // Замените на ваш реальный путь импорта API
+import { defineComponent, ref, watch, onMounted, toRefs } from 'vue'
+import { Chart, Grid, Bar } from 'vue3-charts'
+import { transactionsApi } from '../api/transactions'
 
 export default defineComponent({
-  name: 'PieChart',
-  components: { Chart, Responsive, Pie, Tooltip },
+  name: 'HistogramChart',
+  components: { Chart, Grid, Bar },
   props: {
     selectedYear: Number,
     selectedMonth: Number,
@@ -52,6 +27,8 @@ export default defineComponent({
   setup(props) {
     const { selectedYear, selectedMonth } = toRefs(props)
     const data = ref([])
+    const direction = ref('horizontal')
+    const margin = ref({ left: 0, top: 100, right: 100, bottom: 0 })
 
     const loadData = async () => {
       if (!selectedYear.value || !selectedMonth.value) return
@@ -60,18 +37,23 @@ export default defineComponent({
           selectedYear.value,
           selectedMonth.value
         )
-        data.value = chartData.map((item) => ({
-          name: item.name,
-          pl: item.value,
-        })) // Пример адаптации данных под ожидаемый формат
+        data.value = chartData
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error)
       }
     }
 
-    watch([selectedYear, selectedMonth], loadData, { immediate: true })
+    watch([selectedYear, selectedMonth], loadData)
 
-    return { data }
+    onMounted(loadData)
+
+    return { data, direction, margin }
   },
 })
 </script>
+
+<style>
+#app {
+  color: #2ecc71;
+}
+</style>

@@ -227,19 +227,18 @@ async function getChartForMonthAndYear(req, res) {
     const lastDayOfMonth = new Date(year, month, 0)
 
     const { rows } = await pool.query(
-      `SELECT category, SUM(operation_amount) as total
+      `SELECT EXTRACT(DAY FROM date_of_operation) as day, SUM(operation_amount) as total
        FROM dbo.transactions
        WHERE date_of_operation >= $1
          AND date_of_operation <= $2
-         AND operation_amount < 0
          AND description <> 'Перевод между счетами'
-       GROUP BY category
-       ORDER BY total DESC`, // Сортировка по убыванию суммы, чтобы видеть категории с наибольшими расходами вверху
+       GROUP BY EXTRACT(DAY FROM date_of_operation)
+       ORDER BY day`,
       [firstDayOfMonth, lastDayOfMonth]
     )
 
     const chartData = rows.map((row) => ({
-      name: row.category, // Использование категории вместо дня
+      name: row.day.toString(),
       pl: row.total,
     }))
 
@@ -258,5 +257,6 @@ module.exports = {
   getAvailableYearsAndMonths,
   getChartForMonthAndYear,
   getIncomeExpenseProfitForMonthAndYear,
+  getAllTransactions,
   getMonthlyIncomeExpenseProfit,
 }
