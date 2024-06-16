@@ -5,6 +5,7 @@ const loginController = require('./controllers/b_login')
 
 const finance = require('./controllers/b_transactions')
 const marker = require('./controllers/b_marker')
+const kombat = require('./controllers/b_kombat')
 
 const db = require('./controllers/b_excel')
 
@@ -26,5 +27,8 @@ router.get('/crate-database', db.createAndInsertTransactionsFromXLS)
 router.get('/update-database', db.updateTransactionsFromXLS)
 
 router.get('/my_custom_marker', marker.myCustomMarker)
+
+router.get('/kombat', kombat.getKombat)
+// router.get('/kombat', kombat.addKombat)
 
 module.exports = router

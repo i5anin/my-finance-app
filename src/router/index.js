@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Finance from '@/modules/editor-finance/components/TabsMonth.vue'
+import Kombat from '@/modules/kombat/components/Table.vue'
 import FinanceSumMonth from '@/modules/editor-finance/components/FinanceSumMonth.vue'
 import Login from '@/views/Login.vue'
 import Error404 from '@/views/404.vue'
@@ -23,6 +24,11 @@ const routes = [
     path: '/Finance',
     name: 'Finance',
     component: Finance,
+  },
+  {
+    path: '/Kombat',
+    name: 'Kombat',
+    component: Kombat,
   },
   {
     path: '/FinanceSumMonth',
