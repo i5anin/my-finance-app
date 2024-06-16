@@ -29,6 +29,7 @@ router.get('/update-database', db.updateTransactionsFromXLS)
 router.get('/my_custom_marker', marker.myCustomMarker)
 
 router.get('/kombat', kombat.getKombat)
-// router.get('/kombat', kombat.addKombat)
+router.post('/kombat', kombat.addKombat)
+router.get('/kombat-name', kombat.getUniqueNamesAndLocations)
 
 module.exports = router
