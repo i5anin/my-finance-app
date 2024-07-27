@@ -7,7 +7,7 @@
   </div>
 </template>
 
-<script lang='ts'>
+<script lang="ts">
 import { computed, defineComponent, ref } from "vue";
 import { shuffle } from "lodash";
 import { DoughnutChart, useDoughnutChart } from "vue-chart-3";
@@ -32,33 +32,33 @@ export default defineComponent({
             "#0079AF",
             "#123E6B",
             "#97B0C4",
-            "#A5C8ED",
-          ],
-        },
-      ],
+            "#A5C8ED"
+          ]
+        }
+      ]
     }));
 
     const options = computed<ChartOptions<"doughnut">>(() => ({
       scales: {
         myScale: {
           type: "logarithmic",
-          position: toggleLegend.value ? "left" : "right",
-        },
+          position: toggleLegend.value ? "left" : "right"
+        }
       },
       plugins: {
         legend: {
-          position: toggleLegend.value ? "top" : "bottom",
+          position: toggleLegend.value ? "top" : "bottom"
         },
         title: {
           display: true,
-          text: "Chart.js Doughnut Chart",
-        },
-      },
+          text: "Chart.js Doughnut Chart"
+        }
+      }
     }));
 
     const { doughnutChartProps, doughnutChartRef } = useDoughnutChart({
       chartData: testData,
-      options,
+      options
     });
 
     let index = ref(20);
@@ -82,9 +82,9 @@ export default defineComponent({
       testData,
       options,
       doughnutChartRef,
-      doughnutChartProps,
+      doughnutChartProps
     };
-  },
+  }
 });
 </script>
 
