@@ -15,5 +15,5 @@ FROM
 	JOIN t_exercises ON t_training_exercises.exercise_id = t_exercises.
 	ID LEFT JOIN t_sets ON t_exercises.ID = t_sets.exercise_id
 ORDER BY
-	t_training_exercises."order",
+	t_training_exercises.order,
 	t_sets.set_number
